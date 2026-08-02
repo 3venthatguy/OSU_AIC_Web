@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { NeuralNetworkCanvas } from '../components/NeuralNetworkCanvas';
 import { StatsBar } from '../components/StatsBar';
 import { MissionStatement } from '../components/MissionStatement';
-import { WhatWeDo } from '../components/WhatWeDo';
 import { SponsorsBar } from '../components/SponsorsBar';
 import { AboutSection } from '../components/AboutSection';
 import { HackAITeaser } from '../components/HackAITeaser';
@@ -178,9 +177,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
 
       {/* 3. MISSION STATEMENT */}
       <MissionStatement />
-
-      {/* 4. WHAT WE DO (PHILOSOPHY HORIZONTAL PRESENTATION TRACK) */}
-      <WhatWeDo onNavigate={onNavigate} />
 
       {/* 5. SPONSORS BAR */}
       <SponsorsBar />
