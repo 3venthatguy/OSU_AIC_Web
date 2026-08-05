@@ -3,6 +3,8 @@ import { EVENTS } from '../data';
 import { ClubEvent } from '../types';
 import { Calendar, MapPin, Clock, ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
 import { TextScramble } from '../components/TextScramble';
+import { Reveal } from '../components/Reveal';
+import { useRevealProps, staggerDelay } from '../hooks/useReveal';
 import {
   MEETING_LOCATION,
   MEETING_DAY,
@@ -10,10 +12,22 @@ import {
 } from '../data';
 
 export const Events: React.FC = () => {
+  const heroReveal = useRevealProps();
+  const upcomingHeaderReveal = useRevealProps();
+  const pastHeaderReveal = useRevealProps();
   const [activeFilter, setActiveFilter] = useState<string>('All');
   const [rsvpStatus, setRsvpStatus] = useState<{ [key: string]: boolean }>({});
 
   const filters = ['All', 'Workshop', 'Speaker', 'HackAI', 'Social'];
+
+  // "HackAI" is a proper noun, so it can't just take a naive trailing "s".
+  const filterLabels: Record<string, string> = {
+    All: 'All Events',
+    Workshop: 'Workshops',
+    Speaker: 'Speakers',
+    HackAI: 'HackAI',
+    Social: 'Socials',
+  };
 
   const upcomingEvents = EVENTS.filter((e) => !e.isPast);
   const pastEvents = EVENTS.filter((e) => e.isPast);
@@ -28,7 +42,7 @@ export const Events: React.FC = () => {
       case 'workshop': return 'bg-accent-primary';
       case 'speaker': return 'bg-accent-secondary';
       case 'hackai': return 'bg-gradient-to-r from-accent-primary to-accent-secondary';
-      case 'social': return 'bg-[#6B7FD4]';
+      case 'social': return 'bg-accent-tertiary';
       default: return 'bg-text-muted';
     }
   };
@@ -46,9 +60,9 @@ export const Events: React.FC = () => {
         id="events-hero-header"
         className="py-16 md:py-24 border-b border-border-subtle relative flex flex-col items-center justify-center text-center overflow-hidden"
       >
-        <div className="absolute right-0 top-0 w-[40%] h-full bg-[radial-gradient(circle_at_80%_20%,rgba(59,91,255,0.06)_0%,transparent_50%)] pointer-events-none" />
+        <div className="absolute right-0 top-0 w-[40%] h-full bg-[radial-gradient(circle_at_80%_20%,var(--ui-accent-primary-dim)_0%,transparent_50%)] pointer-events-none" />
         
-        <div className="max-w-3xl mx-auto px-6 relative z-10 flex flex-col items-center">
+        <div className="max-w-3xl mx-auto px-6 relative z-10 flex flex-col items-center" {...heroReveal}>
           <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.25em] block mb-4">
             Get Involved
           </span>
@@ -79,11 +93,11 @@ export const Events: React.FC = () => {
                   onClick={() => setActiveFilter(filter)}
                   className={`px-5 py-2.5 rounded-full font-sans text-xs font-bold tracking-wide transition-all border cursor-pointer ${
                     isActive
-                      ? 'bg-accent-primary text-white border-accent-primary shadow-[0_4px_12px_rgba(59,91,255,0.15)]'
+                      ? 'bg-accent-primary text-on-accent border-accent-primary shadow-[0_4px_12px_var(--ui-accent-glow)]'
                       : 'bg-bg-elevated text-text-secondary hover:text-accent-primary border-border-subtle shadow-sm hover:scale-[1.01]'
                   }`}
                 >
-                  {filter === 'All' ? 'All Events' : `${filter}s`}
+                  {filterLabels[filter] ?? filter}
                 </button>
               );
             })}
@@ -94,7 +108,7 @@ export const Events: React.FC = () => {
       {/* 2. UPCOMING EVENTS GRID */}
       <section id="upcoming-events-grid-section" className="py-20 max-w-7xl mx-auto px-6 md:px-16">
         
-        <div className="flex items-center space-x-3 mb-10 select-none">
+        <div className="flex items-center space-x-3 mb-10 select-none" {...upcomingHeaderReveal}>
           <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.2em]">
             Upcoming Calendar
           </span>
@@ -106,16 +120,16 @@ export const Events: React.FC = () => {
             <span className="text-3xl mb-3">📅</span>
             <h3 className="font-sans font-bold text-text-primary text-[15px] uppercase tracking-wide">No Scheduled Events</h3>
             <p className="font-sans text-xs text-text-secondary leading-relaxed mt-2 text-center max-w-xs">
-              There are no upcoming {activeFilter.toLowerCase()}s on the calendar. Try toggling back to general event categories.
+              There are no upcoming {(filterLabels[activeFilter] ?? activeFilter).toLowerCase()} on the calendar. Try toggling back to general event categories.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredUpcoming.map((item) => {
+            {filteredUpcoming.map((item, idx) => {
               const isRsvped = rsvpStatus[item.id];
               return (
+                <Reveal key={item.id} delay={staggerDelay(idx)}>
                 <div
-                  key={item.id}
                   id={`event-card-item-${item.id}`}
                   className="bg-bg-secondary hover:bg-bg-elevated border border-border-subtle hover:border-accent-primary/20 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 transform hover:-translate-y-1.5 hover:shadow-card group"
                 >
@@ -179,7 +193,7 @@ export const Events: React.FC = () => {
                       <button
                         id={`rsvp-action-btn-${item.id}`}
                         onClick={(e) => handleRsvp(item.id, e)}
-                        className="w-full mt-2 py-3 bg-accent-primary-dim hover:bg-accent-primary text-accent-primary hover:text-white text-xs font-bold rounded-xl flex items-center justify-center space-x-1.5 transition-all cursor-pointer shadow-sm hover:shadow-md"
+                        className="w-full mt-2 py-3 bg-accent-primary-dim hover:bg-accent-primary text-accent-primary hover:text-on-accent text-xs font-bold rounded-xl flex items-center justify-center space-x-1.5 transition-all cursor-pointer shadow-sm hover:shadow-md"
                       >
                         <span>Confirm Attendance RSVP</span>
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -187,6 +201,7 @@ export const Events: React.FC = () => {
                     )}
                   </div>
                 </div>
+                </Reveal>
               );
             })}
           </div>
@@ -197,7 +212,7 @@ export const Events: React.FC = () => {
       <section id="past-events-stripe-section" className="py-20 bg-bg-secondary/40 border-t border-border-subtle">
         <div className="max-w-7xl mx-auto px-6 md:px-16">
           
-          <div className="flex items-center space-x-3 mb-10 select-none">
+          <div className="flex items-center space-x-3 mb-10 select-none" {...pastHeaderReveal}>
             <span className="font-sans text-[12px] font-bold text-text-muted uppercase tracking-[0.2em]">
               Past Events Highlights
             </span>
@@ -210,9 +225,9 @@ export const Events: React.FC = () => {
             className="flex space-x-6 overflow-x-auto pb-4 snap-x pr-4 scrollbar-thin"
             style={{ scrollbarWidth: 'none' }}
           >
-            {pastEvents.map((item) => (
+            {pastEvents.map((item, idx) => (
+              <Reveal key={item.id} delay={staggerDelay(idx)} className="flex-shrink-0">
               <div
-                key={item.id}
                 id={`past-event-stip-card-${item.id}`}
                 className="w-[280px] bg-bg-secondary border border-border-subtle rounded-xl p-5 flex-shrink-0 snap-start flex flex-col justify-between h-[230px] opacity-72 hover:opacity-100 transition-opacity"
               >
@@ -247,6 +262,7 @@ export const Events: React.FC = () => {
                   </a>
                 </div>
               </div>
+              </Reveal>
             ))}
           </div>
 

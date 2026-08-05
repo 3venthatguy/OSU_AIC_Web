@@ -1,17 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 // Defines the chronological layout order of the site navigation architecture
-const PAGE_ORDER = ['home', 'about', 'hackai', 'projects', 'events'];
+const PAGE_ORDER = ['home', 'about', 'hackai', 'projects', 'events', 'getinvolved'];
 
 interface PageTransitionProps {
   activePage: string;
   renderPage: (page: string) => React.ReactNode;
+  /**
+   * Rendered inside the animated container, below the page. The footer has to
+   * transition with the page: left outside, it stays frozen on screen through
+   * the fade-out and then visibly jumps when the scroll resets.
+   */
+  footer?: React.ReactNode;
 }
 
 type AnimationState = 'idle' | 'fading-out' | 'fading-in-init' | 'fading-in-active';
 type Direction = 'forward' | 'backward';
 
-export const PageTransition: React.FC<PageTransitionProps> = ({ activePage, renderPage }) => {
+export const PageTransition: React.FC<PageTransitionProps> = ({ activePage, renderPage, footer }) => {
   // Store currently rendered/displayed page ID
   const [displayingPage, setDisplayingPage] = useState<string>(activePage);
   const [animationState, setAnimationState] = useState<AnimationState>('idle');
@@ -38,8 +44,14 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ activePage, rend
       setDirection(currentDirection);
       setAnimationState('fading-out');
 
+      // Every timer in the chain is tracked here. Returning a cleanup from inside a
+      // setTimeout callback does nothing, so without this a navigation that happens
+      // mid-transition leaves the previous chain running and it clobbers the new
+      // animation state on its way out.
+      const timeouts: ReturnType<typeof setTimeout>[] = [];
+
       // 3. Timing & Performance: Old page has 500ms to fully transition out
-      const fadeOutTimeout = setTimeout(() => {
+      timeouts.push(setTimeout(() => {
         // Change the mounted DOM content to the new page
         setDisplayingPage(activePage);
 
@@ -50,21 +62,17 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ activePage, rend
         setAnimationState('fading-in-init');
 
         // Allow the browser to repaint in the pre-positioned state
-        const delayTimeout = setTimeout(() => {
+        timeouts.push(setTimeout(() => {
           setAnimationState('fading-in-active');
 
           // Completion of the enter animation
-          const fadeInTimeout = setTimeout(() => {
+          timeouts.push(setTimeout(() => {
             setAnimationState('idle');
-          }, 500); // 500ms duration matches elegant easing timing
+          }, 500)); // 500ms duration matches elegant easing timing
+        }, 30)); // Quick tick for paint pipeline
+      }, 500));
 
-          return () => clearTimeout(fadeInTimeout);
-        }, 30); // Quick tick for paint pipeline
-
-        return () => clearTimeout(delayTimeout);
-      }, 500);
-
-      return () => clearTimeout(fadeOutTimeout);
+      return () => timeouts.forEach(clearTimeout);
     }
   }, [activePage]);
 
@@ -115,7 +123,10 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ activePage, rend
       className="w-full relative overflow-visible"
       id="directional-slide-fade-container"
     >
-      {renderPage(displayingPage)}
+      <main id="main-content-flow" className="w-full">
+        {renderPage(displayingPage)}
+      </main>
+      {footer}
     </div>
   );
 };

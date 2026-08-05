@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 import { Calendar, MapPin, Trophy, Sparkles, BrainCircuit, Users, Terminal, Code2, Play } from 'lucide-react';
 import { TextScramble } from '../components/TextScramble';
+import { Reveal } from '../components/Reveal';
+import { useRevealProps, staggerDelay } from '../hooks/useReveal';
 import {
   HACKAI_NAME,
   HACKAI_DATE_FULL,
   HACKAI_LOCATION_FULL,
   HACKAI_BANNER_BADGE,
-  HACKAI_FAQS
+  HACKAI_FAQS,
+  HACKAI_REGISTRATION_URL
 } from '../data';
 
 export const HackAI: React.FC = () => {
+  const heroReveal = useRevealProps();
+  const prizesHeaderReveal = useRevealProps();
+  const scheduleHeaderReveal = useRevealProps();
+  const faqHeaderReveal = useRevealProps();
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
   const toggleFaq = (idx: number) => {
@@ -17,7 +24,7 @@ export const HackAI: React.FC = () => {
   };
 
   const prizes = [
-    { rank: '1st Place Overall', cash: '$5,000', label: 'Grand Prize Sweepstakes', cardBg: 'bg-[linear-gradient(135deg,#0E1B2E_0%,#080E1A_100%)] border-accent-secondary/35' },
+    { rank: '1st Place Overall', cash: '$5,000', label: 'Grand Prize Sweepstakes', cardBg: 'bg-[linear-gradient(135deg,var(--ui-surface-inverse)_0%,var(--ui-surface-inverse-deep)_100%)] border-accent-secondary-on-inverse/35' },
     { rank: '2nd Place Overall', cash: '$3,000', label: 'Silver Medalist', cardBg: 'bg-bg-secondary border-border-subtle' },
     { rank: '3rd Place Overall', cash: '$1,500', label: 'Bronze Medalist', cardBg: 'bg-bg-secondary border-border-subtle' },
     { rank: 'Best Novel UI Agent', cash: '$1,000', label: 'Generative Human Interface', cardBg: 'bg-bg-secondary border-border-subtle' },
@@ -28,7 +35,7 @@ export const HackAI: React.FC = () => {
   const schedule = [
     { time: 'Saturday 8:30 AM', title: 'Check-In & Registration opens', desc: `Arrive at ${HACKAI_LOCATION_FULL}, pick up event credentials and swag kits.` },
     { time: 'Saturday 9:00 AM', title: 'Opening ceremony & keynote address', desc: 'Hear from our corporate research sponsors and reveal the prompt dataset.' },
-    { time: 'Sunday 11:00 AM', title: 'Placeholder', desc: 'Placeholder' },
+    { time: 'Sunday 11:00 AM', title: 'Mentor office hours & workshop block', desc: 'Drop-in debugging with industry mentors plus beginner tracks on APIs and deployment.' },
     { time: 'Sunday 4:00 PM', title: 'Hacking deadline & submissions lock', desc: 'All notebooks and project code repositories must be committed onto GitHub.' },
     { time: 'Sunday 5:30 PM', title: 'Awards ceremony', desc: 'Keynote conclusions, grand cash winners announced and photo rounds.' }
   ];
@@ -39,11 +46,11 @@ export const HackAI: React.FC = () => {
       {/* 1. HACKAI HERO WITH DETAILS */}
       <section
         id="hackai-hero"
-        className="py-16 md:py-24 border-b border-border-subtle relative overflow-hidden bg-[linear-gradient(135deg,#EEF2F9_0%,#E4ECF6_60%,#D6E4F7_100%)] flex flex-col items-center justify-center text-center"
+        className="py-16 md:py-24 border-b border-border-subtle relative overflow-hidden bg-[linear-gradient(135deg,var(--ui-bg-secondary)_0%,var(--ui-bg-primary)_60%,var(--ui-bg-sunken)_100%)] flex flex-col items-center justify-center text-center"
       >
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_40%_30%,rgba(59,91,255,0.08)_0%,transparent_50%)] pointer-events-none" />
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_40%_30%,var(--ui-accent-primary-dim)_0%,transparent_50%)] pointer-events-none" />
         
-        <div className="max-w-4xl mx-auto px-6 relative z-10 flex flex-col items-center">
+        <div className="max-w-4xl mx-auto px-6 relative z-10 flex flex-col items-center" {...heroReveal}>
           <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-accent-secondary/15 text-accent-secondary border border-accent-secondary/20 mb-5 select-none shadow-sm">
             {HACKAI_BANNER_BADGE}
           </span>
@@ -57,11 +64,11 @@ export const HackAI: React.FC = () => {
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-mono text-text-primary mb-12">
-            <div className="flex items-center space-x-2 bg-white/60 border border-border-subtle px-4 py-2.5 rounded-full shadow-sm">
+            <div className="flex items-center space-x-2 bg-bg-elevated/60 border border-border-subtle px-4 py-2.5 rounded-full shadow-sm">
               <Calendar className="w-4 h-4 text-accent-primary" />
               <span>{HACKAI_DATE_FULL}</span>
             </div>
-            <div className="flex items-center space-x-2 bg-white/60 border border-border-subtle px-4 py-2.5 rounded-full shadow-sm">
+            <div className="flex items-center space-x-2 bg-bg-elevated/60 border border-border-subtle px-4 py-2.5 rounded-full shadow-sm">
               <MapPin className="w-4 h-4 text-accent-primary" />
               <span>{HACKAI_LOCATION_FULL}</span>
             </div>
@@ -69,10 +76,10 @@ export const HackAI: React.FC = () => {
 
           <a
             id="scrolldown-register-btn"
-            href="https://docs.google.com/forms/d/e/1FAIpQLSd3Aj_10MRloCjjvdpF_HnvoOI8poBr6LveJTUvKTZkrhiDuA/viewform?usp=header"
+            href={HACKAI_REGISTRATION_URL}
             target="_blank"
             rel="noreferrer"
-            className="px-8 py-4 bg-accent-primary hover:bg-accent-primary-hover text-white font-sans text-sm font-bold rounded-full shadow-[0_4px_16px_rgba(59,91,255,0.25)] hover:shadow-[0_6px_24px_rgba(59,91,255,0.35)] transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer flex items-center space-x-2 inline-flex"
+            className="px-8 py-4 bg-accent-primary hover:bg-accent-primary-hover text-on-accent font-sans text-sm font-bold rounded-full shadow-[0_4px_16px_var(--ui-accent-glow)] hover:shadow-[0_6px_24px_var(--ui-accent-glow)] transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer flex items-center space-x-2 inline-flex"
           >
             <span>Register for HackAI</span>
             <span className="font-mono">→</span>
@@ -82,7 +89,7 @@ export const HackAI: React.FC = () => {
 
       {/* 2. CASH PRIZES SECTIONS */}
       <section id="hackai-prizes-section" className="py-24 max-w-7xl mx-auto px-6 md:px-16">
-        <div className="mb-14 text-center select-none">
+        <div className="mb-14 text-center select-none" {...prizesHeaderReveal}>
           <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.2em] block mb-3 animate-pulse">
             Prize Pool Stakes
           </span>
@@ -99,30 +106,31 @@ export const HackAI: React.FC = () => {
           {prizes.map((item, idx) => {
             const isGrand = idx === 0;
             return (
+              <Reveal key={idx} delay={staggerDelay(idx)} className="h-full">
               <div
-                key={idx}
                 id={`prize-item-${idx}`}
-                className={`p-8 rounded-2xl border flex flex-col justify-between transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg ${item.cardBg}`}
+                className={`h-full p-8 rounded-2xl border flex flex-col justify-between transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg ${item.cardBg}`}
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className={`text-[11px] font-bold uppercase tracking-wider ${isGrand ? 'text-accent-secondary' : 'text-text-muted'}`}>
+                    <span className={`text-[11px] font-bold uppercase tracking-wider ${isGrand ? 'text-accent-secondary-on-inverse' : 'text-text-muted'}`}>
                       {item.rank}
                     </span>
-                    <Trophy className={`w-5 h-5 ${isGrand ? 'text-accent-secondary' : 'text-accent-primary/60'}`} />
+                    <Trophy className={`w-5 h-5 ${isGrand ? 'text-accent-secondary-on-inverse' : 'text-accent-primary/60'}`} />
                   </div>
                   
-                  <div className={`font-mono text-[38px] md:text-[48px] font-extrabold tracking-tight leading-none mt-4 ${isGrand ? 'text-white' : 'text-accent-primary'}`}>
+                  <div className={`font-mono text-[38px] md:text-[48px] font-extrabold tracking-tight leading-none mt-4 ${isGrand ? 'text-on-inverse' : 'text-accent-primary'}`}>
                     {item.cash}
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-border-subtle/40 mt-8">
-                  <span className={`text-xs font-sans ${isGrand ? 'text-[#8A9AB4]' : 'text-text-secondary'}`}>
+                <div className={`pt-4 border-t mt-8 ${isGrand ? 'border-border-inverse' : 'border-border-subtle/40'}`}>
+                  <span className={`text-xs font-sans ${isGrand ? 'text-on-inverse-muted' : 'text-text-secondary'}`}>
                     {item.label}
                   </span>
                 </div>
               </div>
+              </Reveal>
             );
           })}
         </div>
@@ -131,19 +139,20 @@ export const HackAI: React.FC = () => {
       {/* 3. WEEKEND SCHEDULE TIMELINE */}
       <section id="hackai-timeline-section" className="py-24 bg-bg-secondary/40 border-y border-border-subtle">
         <div className="max-w-3xl mx-auto px-6">
-          <div className="mb-14 text-center select-none">
+          <div className="mb-14 text-center select-none" {...scheduleHeaderReveal}>
             <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.2em] block mb-3">
               Event Agenda
             </span>
             <h2 className="font-display text-[32px] md:text-[42px] font-extrabold text-text-primary tracking-tight">
-              36-Hour Hack Schedule
+              Weekend Hack Schedule
             </h2>
           </div>
 
           {/* Timeline Node Chain */}
           <div className="relative border-l border-border-medium/60 ml-3 md:ml-6 space-y-12">
             {schedule.map((item, idx) => (
-              <div key={idx} className="relative pl-8 md:pl-10">
+              <Reveal key={idx} delay={staggerDelay(idx)}>
+              <div className="relative pl-8 md:pl-10">
                 
                 {/* Timeline node marker circle */}
                 <span className="absolute -left-2 top-1.5 w-4.5 h-4.5 rounded-full border-2 border-accent-primary bg-bg-primary flex items-center justify-center">
@@ -151,7 +160,7 @@ export const HackAI: React.FC = () => {
                 </span>
 
                 <div className="text-left">
-                  <span className="font-mono text-[11px] font-extrabold text-[#3B5BFF] bg-accent-primary-dim px-2.5 py-1 rounded-md">
+                  <span className="font-mono text-[11px] font-extrabold text-accent-primary bg-accent-primary-dim px-2.5 py-1 rounded-md">
                     {item.time}
                   </span>
                   <h4 className="font-sans text-[16px] md:text-[18px] font-extrabold text-text-primary leading-tight mt-3">
@@ -162,6 +171,7 @@ export const HackAI: React.FC = () => {
                   </p>
                 </div>
               </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -170,11 +180,11 @@ export const HackAI: React.FC = () => {
       {/* HackAI FAQ section */}
       <section id="hackai-faqs" className="py-24 bg-bg-primary border-t border-border-subtle select-none">
         <div className="max-w-3xl mx-auto px-6">
-          <div className="mb-14 text-center">
+          <div className="mb-14 text-center" {...faqHeaderReveal}>
             <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.2em] block mb-3">
               FAQ
             </span>
-            <h2 className="font-display text-[32px] md:text-[42px] font-extrabold text-[#0E1B2E] dark:text-text-primary tracking-tight">
+            <h2 className="font-display text-[32px] md:text-[42px] font-extrabold text-text-primary tracking-tight">
               HackAI Frequently Asked Questions
             </h2>
             <p className="font-sans text-sm text-text-secondary mt-3">
@@ -186,8 +196,8 @@ export const HackAI: React.FC = () => {
             {HACKAI_FAQS.map((faq, idx) => {
               const isExpanded = expandedFaq === idx;
               return (
+                <Reveal key={idx} delay={staggerDelay(idx)}>
                 <div
-                  key={idx}
                   id={`hackai-faq-panel-item-${idx}`}
                   className="bg-bg-elevated border border-border-subtle rounded-2xl overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md hover:border-accent-primary/20"
                 >
@@ -203,7 +213,7 @@ export const HackAI: React.FC = () => {
                   </button>
 
                   {isExpanded && (
-                    <div id={`hackai-faq-answer-block-${idx}`} className="px-6 pb-6 animate-fade-in animate-duration-200">
+                    <div id={`hackai-faq-answer-block-${idx}`} className="px-6 pb-6 animate-fade-in">
                       <div className="h-[1px] w-full bg-border-subtle/50 mb-4" />
                       <p className="font-sans text-[13.5px] text-text-secondary leading-relaxed">
                         {faq.a}
@@ -211,6 +221,7 @@ export const HackAI: React.FC = () => {
                     </div>
                   )}
                 </div>
+                </Reveal>
               );
             })}
           </div>

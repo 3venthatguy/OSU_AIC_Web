@@ -1,9 +1,14 @@
 import React from 'react';
 import { Mail, MessageSquare, ExternalLink, Instagram, Linkedin } from 'lucide-react';
-// @ts-ignore
-import aiLogo from '../../assets/.aistudio/images/AI_Logo_Final.png';
+import { useRevealProps } from '../hooks/useReveal';
+import aiLogo from '../../assets/images/AI_Logo_Final.png';
 import {
   HACKAI_NAME,
+  CLUB_EMAIL,
+  CLUB_DISCORD_URL,
+  CLUB_INSTAGRAM_URL,
+  CLUB_LINKEDIN_URL,
+  NEWSLETTER_URL,
 } from '../data';
 
 interface FooterProps {
@@ -12,6 +17,13 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate, activePage }) => {
+  // In-place props rather than <Reveal> wrappers: these three are `lg:col-span-*`
+  // children of the 12-col grid and have to stay direct children of it.
+  const brandReveal = useRevealProps();
+  const linksReveal = useRevealProps(80);
+  const contactReveal = useRevealProps(160);
+  const bottomReveal = useRevealProps(240);
+
   return (
     <footer
       id="footer-contact"
@@ -19,17 +31,17 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, activePage }) => {
     >
       {/* Decorative gradient shadows */}
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-primary/20 to-transparent" />
-      <div className="absolute bottom-0 right-0 w-[40%] h-[300px] bg-[radial-gradient(circle_at_80%_80%,rgba(59,91,255,0.04)_0%,transparent_60%)] pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[40%] h-[300px] bg-[radial-gradient(circle_at_80%_80%,var(--ui-accent-primary-dim)_0%,transparent_60%)] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 md:px-16 grid grid-cols-1 lg:grid-cols-12 gap-16 pb-16">
         
         {/* Col 1 (5/12): Brand logo, bio, newsletter */}
-        <div className="lg:col-span-5 flex flex-col items-start">
+        <div className="lg:col-span-5 flex flex-col items-start" {...brandReveal}>
           <div className="flex items-center mb-6">
-            <div className="w-9 h-9 flex items-center justify-center bg-[#0E1B2E] rounded-xl shadow-md">
+            <div className="w-9 h-9 flex items-center justify-center bg-surface-inverse rounded-xl shadow-md">
               <img
                 src={aiLogo}
-                alt="Discord Server"
+                alt="AI @ OSU Logo"
                 className="w-5.5 h-5.5 object-contain"
                 referrerPolicy="no-referrer"
               />
@@ -44,10 +56,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, activePage }) => {
           <div className="w-full max-w-sm">
             <a
               id="footer-newsletter-button"
-              href="https://go.osu.edu/aiclub"
+              href={NEWSLETTER_URL}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center h-11 px-6 bg-accent-primary hover:bg-accent-primary-hover text-white font-sans text-xs font-bold rounded-full shadow-[0_4px_14px_rgba(59,91,255,0.2)] hover:shadow-[0_6px_20px_rgba(59,91,255,0.3)] transform hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
+              className="inline-flex items-center justify-center h-11 px-6 bg-accent-primary hover:bg-accent-primary-hover text-on-accent font-sans text-xs font-bold rounded-full shadow-[0_4px_14px_var(--ui-accent-glow)] hover:shadow-[0_6px_20px_var(--ui-accent-glow)] transform hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
             >
               <span>Subscribe to our Newsletter</span>
               <span className="ml-2 font-mono">→</span>
@@ -56,7 +68,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, activePage }) => {
         </div>
 
         {/* Col 2 (3/12): Quick Links */}
-        <div className="lg:col-span-3 flex flex-col items-start">
+        <div className="lg:col-span-3 flex flex-col items-start" {...linksReveal}>
           <span className="font-sans text-[11px] font-bold text-text-primary uppercase tracking-widest block mb-6">
             Quick Navigation
           </span>
@@ -66,6 +78,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, activePage }) => {
               { label: 'Our Story & Officers', id: 'about' },
               { label: `${HACKAI_NAME}`, id: 'hackai' },
               { label: 'Events Calendar', id: 'events' },
+              { label: 'Get Involved', id: 'getinvolved' },
             ].map((link) => (
               <button
                 key={link.id}
@@ -86,7 +99,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, activePage }) => {
         </div>
 
         {/* Col 3 (4/12): Contacts / External */}
-        <div id="footer-external-presence" className="lg:col-span-4 flex flex-col items-start">
+        <div id="footer-external-presence" className="lg:col-span-4 flex flex-col items-start" {...contactReveal}>
           <span className="font-sans text-[11px] font-bold text-text-primary uppercase tracking-widest block mb-6">
             Resources & Contact
           </span>
@@ -95,7 +108,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, activePage }) => {
             {/* Discord */}
             <a
               id="footer-discord-link"
-              href="https://discord.com/invite/GPCmTECWRu"
+              href={CLUB_DISCORD_URL}
               target="_blank"
               rel="noreferrer"
               className="flex items-center space-x-3 text-text-secondary hover:text-accent-primary transition-colors group"
@@ -118,7 +131,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, activePage }) => {
             {/* Instagram */}
             <a
               id="footer-instagram-link"
-              href="http://www.instagram.com/ohiostateaiclub"
+              href={CLUB_INSTAGRAM_URL}
               target="_blank"
               rel="noreferrer"
               className="flex items-center space-x-3 text-text-secondary hover:text-accent-primary transition-colors group"
@@ -135,7 +148,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, activePage }) => {
             {/* LinkedIn */}
             <a
               id="footer-linkedin-link"
-              href="https://www.linkedin.com/company/artificial-intelligence-club/about/"
+              href={CLUB_LINKEDIN_URL}
               target="_blank"
               rel="noreferrer"
               className="flex items-center space-x-3 text-text-secondary hover:text-accent-primary transition-colors group"
@@ -152,7 +165,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, activePage }) => {
             {/* Email */}
             <a
               id="footer-email-link"
-              href="mailto:osuaiclub@gmail.com"
+              href={`mailto:${CLUB_EMAIL}`}
               className="flex items-center space-x-3 text-text-secondary hover:text-accent-primary transition-colors group"
             >
               <div className="w-9 h-9 rounded-xl bg-bg-secondary group-hover:bg-accent-primary-dim flex items-center justify-center transition-colors">
@@ -160,7 +173,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, activePage }) => {
               </div>
               <div className="flex flex-col">
                 <span className="font-sans font-bold text-text-primary group-hover:text-accent-primary">Contact Officers</span>
-                <span className="text-xs text-text-muted">osuaiclub@gmail.com</span>
+                <span className="text-xs text-text-muted">{CLUB_EMAIL}</span>
               </div>
             </a>
 
@@ -170,7 +183,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, activePage }) => {
       </div>
 
       {/* Footer Bottom copyright row */}
-      <div className="max-w-7xl mx-auto px-6 md:px-16 pt-8 border-t border-border-subtle flex flex-col md:flex-row items-center justify-between text-xs text-text-muted">
+      <div className="max-w-7xl mx-auto px-6 md:px-16 pt-8 border-t border-border-subtle flex flex-col md:flex-row items-center justify-between text-xs text-text-muted" {...bottomReveal}>
         <div>
           © {new Date().getFullYear()} Artificial Intelligence Club at The Ohio State University. All rights reserved.
         </div>

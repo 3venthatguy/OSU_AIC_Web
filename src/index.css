@@ -1,49 +1,271 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
-@theme {
+/* Class-based dark mode. Tailwind v4 defaults `dark:` to prefers-color-scheme;
+   we drive it from a `dark` class on <html> so the navbar toggle can override
+   the OS setting. See src/theme.ts. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   LAYER 1 — raw values, swapped per theme.
+
+   These are NOT visible to Tailwind. Every one of them is re-declared under
+   `.dark` below. Edit colors here, never in JSX.
+   --------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --ui-bg-primary: #F4F7FA;
+  --ui-bg-secondary: #E8EEF5;
+  --ui-bg-elevated: #FFFFFF;
+  --ui-bg-sunken: #E2E9F2;
+
+  /* Type ramp */
+  --ui-text-primary: #16191D;
+  --ui-text-secondary: #4A5563;
+  --ui-text-muted: #8792A3;
+  --ui-text-nav: #2C333D;
+
+  /* Brand blue. #4F9DDB is only 2.9:1 on white, so light mode uses the same
+     hue darkened to 4.9:1 — it has to work both as link text and as a button
+     fill carrying a white label. Dark mode gets the real #4F9DDB. */
+  --ui-accent-primary: #2A75B3;
+  --ui-accent-primary-hover: #1F5B8E;
+  --ui-accent-primary-dim: rgba(42, 117, 179, 0.10);
+
+  /* Brand green */
+  --ui-accent-secondary: #1A7A4A;
+  --ui-accent-secondary-dim: rgba(26, 122, 74, 0.10);
+
+  /* Brand purple */
+  --ui-accent-tertiary: #6B33B8;
+  --ui-accent-tertiary-dim: rgba(107, 51, 184, 0.10);
+
+  /* Label color that sits on top of an accent fill */
+  --ui-on-accent: #FFFFFF;
+
+  /* Inverse surfaces: elements that are deliberately dark islands on a light
+     page (logo chip, HackAI grand-prize card, HackAI teaser panel). In dark
+     mode these resolve LIGHTER than the page so they still read as panels. */
+  --ui-surface-inverse: #16191D;
+  --ui-surface-inverse-deep: #0B0E12;
+  --ui-text-on-inverse: #FFFFFF;
+  --ui-text-on-inverse-muted: #8792A3;
+  --ui-border-inverse: rgba(255, 255, 255, 0.06);
+
+  /* Accents used INSIDE an inverse panel. Those panels are dark in both themes,
+     so these stay at the bright end of the ramp and are identical in `.dark`. */
+  --ui-accent-primary-on-inverse: #4F9DDB;
+  --ui-accent-secondary-on-inverse: #4FDB8B;
+
+  /* Scrims */
+  --ui-overlay: rgba(11, 14, 18, 0.60);
+  --ui-nav-scrim: rgba(244, 247, 250, 0.82);
+
+  /* Borders */
+  --ui-border-subtle: rgba(42, 117, 179, 0.12);
+  --ui-border-medium: rgba(42, 117, 179, 0.28);
+  --ui-border-strong: rgba(42, 117, 179, 0.45);
+
+  /* Status */
+  --ui-status-success: #1A7A4A;
+  --ui-status-warning: #B45309;
+  --ui-status-danger: #C2261D;
+
+  /* Effects. --ui-accent-glow is the tint under accent button shadows;
+     --ui-shadow-color is the neutral drop shadow under cards. */
+  --ui-accent-glow: rgba(42, 117, 179, 0.25);
+  --ui-shadow-color: rgba(22, 25, 29, 0.10);
+  --ui-shadow-card: 0 2px 12px rgba(22, 25, 29, 0.05);
+  --ui-shadow-card-hover: 0 8px 28px rgba(22, 25, 29, 0.10);
+  --ui-badge-accent: rgba(26, 122, 74, 0.12);
+
+  --ui-page-gradient: linear-gradient(135deg, #DCE7F4 0%, #F4F7FA 40%, #F7F5F0 100%);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --ui-bg-primary: #16191D;
+  --ui-bg-secondary: #1C2027;
+  --ui-bg-elevated: #22272F;
+  --ui-bg-sunken: #101317;
+
+  --ui-text-primary: #F2F4F7;
+  --ui-text-secondary: #B4BCC7;
+  --ui-text-muted: #7C8695;
+  --ui-text-nav: #C9D1DC;
+
+  --ui-accent-primary: #4F9DDB;
+  --ui-accent-primary-hover: #6FB0E4;
+  --ui-accent-primary-dim: rgba(79, 157, 219, 0.14);
+
+  --ui-accent-secondary: #4FDB8B;
+  --ui-accent-secondary-dim: rgba(79, 219, 139, 0.14);
+
+  /* #8B4FDB is 3.6:1 on charcoal — fine for icons, borders and large type but
+     not body text. Lifted here so it stays usable as a foreground. */
+  --ui-accent-tertiary: #A87BE8;
+  --ui-accent-tertiary-dim: rgba(139, 79, 219, 0.18);
+
+  /* Dark text on the light-blue fill, not white (6.0:1). */
+  --ui-on-accent: #10141A;
+
+  --ui-surface-inverse: #252A32;
+  --ui-surface-inverse-deep: #1A1E24;
+  --ui-text-on-inverse: #F2F4F7;
+  --ui-text-on-inverse-muted: #8792A3;
+  --ui-border-inverse: rgba(255, 255, 255, 0.10);
+
+  /* Intentionally unchanged from :root — inverse panels are dark in both themes. */
+  --ui-accent-primary-on-inverse: #4F9DDB;
+  --ui-accent-secondary-on-inverse: #4FDB8B;
+
+  --ui-overlay: rgba(6, 8, 11, 0.66);
+  --ui-nav-scrim: rgba(22, 25, 29, 0.82);
+
+  --ui-border-subtle: rgba(79, 157, 219, 0.16);
+  --ui-border-medium: rgba(79, 157, 219, 0.30);
+  --ui-border-strong: rgba(79, 157, 219, 0.48);
+
+  --ui-status-success: #4FDB8B;
+  --ui-status-warning: #E9A23B;
+  --ui-status-danger: #F2695E;
+
+  /* Light-mode shadows vanish on charcoal, so dark mode leans on deeper black
+     plus a brighter hairline for edge definition. */
+  --ui-accent-glow: rgba(79, 157, 219, 0.30);
+  --ui-shadow-color: rgba(0, 0, 0, 0.45);
+  --ui-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.40);
+  --ui-shadow-card-hover: 0 8px 28px rgba(0, 0, 0, 0.55);
+  --ui-badge-accent: rgba(79, 219, 139, 0.14);
+
+  --ui-page-gradient: linear-gradient(135deg, #1B2029 0%, #16191D 40%, #191C21 100%);
+}
+
+/* ---------------------------------------------------------------------------
+   LAYER 2 — the Tailwind utility surface.
+
+   `@theme inline` is load-bearing: a plain `@theme` copies literal values into
+   each utility, which would make the `.dark` overrides above inert. `inline`
+   emits `var(--ui-*)` instead, so the cascade does the theming for us.
+   --------------------------------------------------------------------------- */
+@theme inline {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Plus Jakarta Sans", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --color-bg-primary: #EEF2F9;
-  --color-bg-secondary: #E4ECF6;
-  --color-bg-elevated: #FFFFFF;
-  --color-accent-primary: #3B5BFF;
-  --color-accent-primary-hover: #2A47E0;
-  --color-accent-secondary: #00A878;
-  --color-accent-primary-dim: rgba(59, 91, 255, 0.10);
-  --color-text-primary: #0E1B2E;
-  --color-text-secondary: #4A5A72;
-  --color-text-muted: #8A9AB4;
-  --color-text-nav: #2C3A52;
-  --color-border-subtle: rgba(59, 91, 255, 0.10);
-  --color-border-medium: rgba(59, 91, 255, 0.25);
+  --color-bg-primary: var(--ui-bg-primary);
+  --color-bg-secondary: var(--ui-bg-secondary);
+  --color-bg-elevated: var(--ui-bg-elevated);
+  --color-bg-sunken: var(--ui-bg-sunken);
+
+  --color-text-primary: var(--ui-text-primary);
+  --color-text-secondary: var(--ui-text-secondary);
+  --color-text-muted: var(--ui-text-muted);
+  --color-text-nav: var(--ui-text-nav);
+
+  --color-accent-primary: var(--ui-accent-primary);
+  --color-accent-primary-hover: var(--ui-accent-primary-hover);
+  --color-accent-primary-dim: var(--ui-accent-primary-dim);
+
+  --color-accent-secondary: var(--ui-accent-secondary);
+  --color-accent-secondary-dim: var(--ui-accent-secondary-dim);
+
+  --color-accent-tertiary: var(--ui-accent-tertiary);
+  --color-accent-tertiary-dim: var(--ui-accent-tertiary-dim);
+
+  --color-on-accent: var(--ui-on-accent);
+
+  --color-surface-inverse: var(--ui-surface-inverse);
+  --color-surface-inverse-deep: var(--ui-surface-inverse-deep);
+  --color-text-on-inverse: var(--ui-text-on-inverse);
+  --color-text-on-inverse-muted: var(--ui-text-on-inverse-muted);
+  --color-border-inverse: var(--ui-border-inverse);
+  --color-accent-primary-on-inverse: var(--ui-accent-primary-on-inverse);
+  --color-accent-secondary-on-inverse: var(--ui-accent-secondary-on-inverse);
+
+  --color-overlay: var(--ui-overlay);
+  --color-nav-scrim: var(--ui-nav-scrim);
+
+  --color-border-subtle: var(--ui-border-subtle);
+  --color-border-medium: var(--ui-border-medium);
+  --color-border-strong: var(--ui-border-strong);
+
+  --color-status-success: var(--ui-status-success);
+  --color-status-warning: var(--ui-status-warning);
+  --color-status-danger: var(--ui-status-danger);
+
+  --color-badge-accent: var(--ui-badge-accent);
+
+  /* These three were referenced in 8 places but never defined, so they emitted
+     no CSS at all. Defining them here restores the intended card styling. */
+  --shadow-card: var(--ui-shadow-card);
+  --shadow-card-hover: var(--ui-shadow-card-hover);
+
+  /* Backs the `animate-fade-in` utility used by the nav drawer, RSVP
+     confirmations and the FAQ accordions. */
+  --animate-fade-in: fade-in 350ms cubic-bezier(0.25, 1, 0.5, 1) both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 @layer base {
   body {
-    background-color: var(--color-bg-primary);
-    background-image: linear-gradient(135deg, #D6E4F7 0%, #EEF2F9 40%, #F5F3EE 100%);
+    background-color: var(--ui-bg-primary);
+    background-image: var(--ui-page-gradient);
     background-attachment: fixed;
-    color: var(--color-text-secondary);
+    color: var(--ui-text-secondary);
     font-family: var(--font-sans);
     overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    color: var(--color-text-primary);
+    color: var(--ui-text-primary);
   }
+}
+
+/* Scroll-triggered reveals — see src/hooks/useReveal.ts.
+   The hidden state lives INSIDE `no-preference` so that under
+   `prefers-reduced-motion: reduce` nothing is ever hidden in the first place;
+   the accessible path then needs no JS to rescue it. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 620ms cubic-bezier(0.25, 1, 0.5, 1),
+      transform 620ms cubic-bezier(0.25, 1, 0.5, 1);
+  }
+}
+
+/* `transform: none`, deliberately not `translateY(0)`: a lingering transform
+   makes the element a containing block, which offsets getBoundingClientRect()
+   for the officer/project flip-card measurement and re-anchors any
+   position:fixed descendant. */
+[data-reveal][data-revealed] {
+  opacity: 1;
+  transform: none;
 }
 
 /* Custom styles for animations and aesthetics */
 .glow-blue-shadow {
-  box-shadow: 0 4px 20px rgba(59, 91, 255, 0.22);
+  box-shadow: 0 4px 20px var(--ui-accent-glow);
 }
 
 .glow-blue-shadow-hover:hover {
-  box-shadow: 0 8px 32px rgba(59, 91, 255, 0.3);
+  box-shadow: 0 8px 32px var(--ui-accent-glow);
 }
 
 /* Custom scroll bar spacing */
@@ -53,16 +275,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-primary);
+  background: var(--ui-bg-primary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border-medium);
+  background: var(--ui-border-medium);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent-primary);
+  background: var(--ui-accent-primary);
 }
 
 /* Simple marquee utility */

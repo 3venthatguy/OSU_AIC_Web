@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, ChevronRight } from 'lucide-react';
-// @ts-ignore
-import aiLogo from '../../assets/.aistudio/images/AI_Logo_Final.png';
+import aiLogo from '../../assets/images/AI_Logo_Final.png';
+import { ThemeToggle } from './ThemeToggle';
 
 interface NavbarProps {
   activePage: string;
@@ -38,14 +38,11 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
     { label: 'HackAI', id: 'hackai' },
     { label: 'Projects', id: 'projects' }, // on home page, anchors to projects list
     { label: 'Events', id: 'events' },
-    { label: 'Contact Us', id: 'contact' }, // scrolls down to footer
   ];
 
   const handleNavClick = (id: string) => {
     setMobileMenuOpen(false);
-    if (id === 'contact') {
-      document.getElementById('footer-contact')?.scrollIntoView({ behavior: 'smooth' });
-    } else if (id === activePage) {
+    if (id === activePage) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       onNavigate(id);
@@ -58,30 +55,35 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
         id="main-navigation-header"
         className={`fixed top-0 left-0 right-0 w-full z-50 h-[72px] transition-all duration-350 flex items-center ${
           scrolled || activePage !== 'home'
-            ? 'bg-[rgba(238,242,249,0.82)] backdrop-blur-xl border-b border-border-subtle shadow-[0_1px_12px_rgba(14,27,46,0.04)]'
+            ? 'bg-nav-scrim backdrop-blur-xl border-b border-border-subtle shadow-[0_1px_12px_var(--ui-shadow-color)]'
             : 'bg-transparent'
         }`}
       >
+        {/* The left and right rails both carry `flex-1` so they claim equal width.
+            Without that, `justify-between` centers the nav links between a 36px
+            logo and a ~200px toggle+CTA cluster, which visibly pulls them left. */}
         <div className="w-full max-w-7xl mx-auto px-6 md:px-16 flex items-center justify-between">
-          
-          {/* Left: Logo Mark */}
-          <div
-            id="nav-brand-logo"
-            className="flex items-center cursor-pointer group"
-            onClick={() => handleNavClick('home')}
-          >
-            <div className="w-9 h-9 flex items-center justify-center bg-[#0E1B2E] rounded-xl shadow-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_4px_16px_rgba(14,27,46,0.25)]">
-              <img
-                src={aiLogo}
-                alt="AI @ OSU Logo"
-                className="w-5.5 h-5.5 object-contain"
-                referrerPolicy="no-referrer"
-              />
+
+          {/* Left rail: Logo Mark */}
+          <div className="flex-1 flex justify-start">
+            <div
+              id="nav-brand-logo"
+              className="flex items-center cursor-pointer group"
+              onClick={() => handleNavClick('home')}
+            >
+              <div className="w-9 h-9 flex items-center justify-center bg-surface-inverse rounded-xl shadow-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_4px_16px_var(--ui-shadow-color)]">
+                <img
+                  src={aiLogo}
+                  alt="AI @ OSU Logo"
+                  className="w-5.5 h-5.5 object-contain"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
             </div>
           </div>
 
           {/* Center: Desktop Nav Links */}
-          <div id="desktop-nav-links" className="hidden md:flex items-center space-x-10">
+          <div id="desktop-nav-links" className="hidden md:flex items-center space-x-10 shrink-0">
             {navItems.map((item) => {
               const isActive = activePage === item.id;
               return (
@@ -101,28 +103,33 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
             })}
           </div>
 
-          {/* Right: Join Pill CTA */}
-          <div className="hidden md:block">
-            <button
-              id="nav-join-cta-button"
-              onClick={() => onNavigate('events')}
-              className="h-[38px] px-5 bg-accent-primary hover:bg-accent-primary-hover text-white font-sans text-[14px] font-semibold rounded-full flex items-center space-x-1.5 shadow-[0_4px_14px_rgba(59,91,255,0.25)] hover:shadow-[0_6px_20px_rgba(59,91,255,0.35)] transform hover:scale-[1.03] transition-all duration-200 cursor-pointer"
-            >
-              <span>Join the Club</span>
-              <span className="text-[16px] leading-none mb-0.5">›</span>
-            </button>
-          </div>
+          {/* Right rail: theme toggle + CTA on desktop, hamburger on mobile */}
+          <div className="flex-1 flex justify-end items-center">
 
-          {/* Mobile Hamburguer */}
-          <div className="md:hidden flex items-center">
-            <button
-              id="mobile-menu-toggle"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-text-primary p-1 focus:outline-none"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            <div className="hidden md:flex items-center space-x-3">
+              <ThemeToggle />
+              <button
+                id="nav-join-cta-button"
+                onClick={() => handleNavClick('getinvolved')}
+                className="h-[38px] px-5 bg-accent-primary hover:bg-accent-primary-hover text-on-accent font-sans text-[14px] font-semibold rounded-full flex items-center space-x-1.5 whitespace-nowrap shadow-[0_4px_14px_var(--ui-accent-glow)] hover:shadow-[0_6px_20px_var(--ui-accent-glow)] transform hover:scale-[1.03] transition-all duration-200 cursor-pointer"
+              >
+                <span>Get Involved</span>
+                <span className="text-[16px] leading-none mb-0.5">›</span>
+              </button>
+            </div>
+
+            {/* Mobile Hamburguer */}
+            <div className="md:hidden flex items-center space-x-2">
+              <ThemeToggle />
+              <button
+                id="mobile-menu-toggle"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="text-text-primary p-1 focus:outline-none"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
       </nav>
@@ -147,12 +154,14 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
 
             <button
               id="mobile-nav-join-button"
-              onClick={() => handleNavClick('events')}
-              className="w-full h-12 bg-accent-primary text-white font-sans font-semibold rounded-full flex items-center justify-center space-x-2 shadow-md"
+              onClick={() => handleNavClick('getinvolved')}
+              className="w-full h-12 bg-accent-primary text-on-accent font-sans font-semibold rounded-full flex items-center justify-center space-x-2 shadow-md"
             >
-              <span>Join the Club</span>
+              <span>Get Involved</span>
               <span className="text-[18px]">›</span>
             </button>
+
+            <ThemeToggle variant="full" />
           </div>
         </div>
       )}

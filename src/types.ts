@@ -6,7 +6,8 @@ export interface Officer {
   minor?: string;
   year: string;
   bio: string;
-  photoUrl?: string;
+  /** Resolved URL of a bundled headshot imported in data.ts. Omit to render `initials` instead. */
+  photo?: string;
   initials: string;
   socials: {
     linkedin?: string;

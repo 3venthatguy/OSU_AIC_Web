@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { FAQS } from '../data';
+import { Reveal } from './Reveal';
+import { useRevealProps, staggerDelay } from '../hooks/useReveal';
 
 export const FAQ: React.FC = () => {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const headerReveal = useRevealProps();
 
   const toggleFaq = (idx: number) => {
     setExpandedFaq(prev => (prev === idx ? null : idx));
@@ -11,11 +14,11 @@ export const FAQ: React.FC = () => {
   return (
     <section id="club-faqs" className="py-24 bg-bg-primary border-t border-border-subtle select-none">
       <div className="max-w-3xl mx-auto px-6">
-        <div className="mb-14 text-center">
+        <div className="mb-14 text-center" {...headerReveal}>
           <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.2em] block mb-3">
             Help Center
           </span>
-          <h2 className="font-display text-[32px] md:text-[42px] font-extrabold text-[#0E1B2E] dark:text-text-primary tracking-tight">
+          <h2 className="font-display text-[32px] md:text-[42px] font-extrabold text-text-primary tracking-tight">
             Frequently Asked Questions
           </h2>
           <p className="font-sans text-sm text-text-secondary mt-3">
@@ -27,8 +30,8 @@ export const FAQ: React.FC = () => {
           {FAQS.map((faq, idx) => {
             const isExpanded = expandedFaq === idx;
             return (
+              <Reveal key={idx} delay={staggerDelay(idx)}>
               <div
-                key={idx}
                 id={`faq-panel-item-${idx}`}
                 className="bg-bg-elevated border border-border-subtle rounded-2xl overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md hover:border-accent-primary/20"
               >
@@ -52,6 +55,7 @@ export const FAQ: React.FC = () => {
                   </div>
                 )}
               </div>
+              </Reveal>
             );
           })}
         </div>

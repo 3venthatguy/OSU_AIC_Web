@@ -2,16 +2,20 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
-// @ts-ignore
-import aiLogo from '../assets/.aistudio/images/AI_Logo_Final.png';
+import aiLogo from '../assets/images/AI_Logo_Final.png';
+import { initTheme, subscribe } from './theme';
 
-// Dynamically generate a high-quality app icon/favicon with a rounded dark background (#0E1B2E)
+// Reconcile the class set by the pre-paint script in index.html with the store.
+initTheme();
+
+// Dynamically generate a high-quality app icon/favicon with a rounded themed background.
 const setupDynamicFavicon = () => {
   if (typeof window === 'undefined') return;
   const img = new Image();
   img.src = aiLogo;
   img.crossOrigin = 'anonymous';
-  img.onload = () => {
+
+  const draw = () => {
     try {
       const size = 128;
       const canvas = document.createElement('canvas');
@@ -20,8 +24,12 @@ const setupDynamicFavicon = () => {
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      // Draw rounded rectangle background using deep dark navy blue (#0E1B2E)
-      ctx.fillStyle = '#0E1B2E';
+      // Background follows the theme's inverse surface token rather than a
+      // hardcoded navy, so the tab icon tracks light/dark like the rest of the UI.
+      ctx.fillStyle =
+        getComputedStyle(document.documentElement)
+          .getPropertyValue('--ui-surface-inverse')
+          .trim() || '#16191D';
       const radius = size * 0.25;
       
       if (typeof ctx.roundRect === 'function') {
@@ -58,8 +66,14 @@ const setupDynamicFavicon = () => {
       link.type = 'image/png';
       link.href = canvas.toDataURL('image/png');
     } catch (e) {
-      console.warn('Failed to construct dark-background favicon', e);
+      console.warn('Failed to construct themed favicon', e);
     }
+  };
+
+  img.onload = () => {
+    draw();
+    // Redraw when the theme flips so the tab icon keeps matching the page.
+    subscribe(draw);
   };
 };
 

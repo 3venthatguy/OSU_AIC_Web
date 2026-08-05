@@ -22,11 +22,20 @@ import {
   Cpu,
   X
 } from 'lucide-react';
-import { PROJECTS, MEETING_LOCATION, MEETING_DAY, MEETING_TIME } from '../data';
+import { PROJECTS, MEETING_LOCATION, MEETING_DAY, MEETING_TIME, CLUB_EMAIL, PROJECT_APPLICATION_URL } from '../data';
 import { ProjectItem } from '../types';
 import { TextScramble } from '../components/TextScramble';
+import { Reveal } from '../components/Reveal';
+import { useRevealProps, staggerDelay } from '../hooks/useReveal';
 
 export const Projects: React.FC = () => {
+  const heroReveal = useRevealProps();
+  const heroStatsReveal = useRevealProps(120);
+  // In-place props: the sidebar and the results column are `lg:col-span-*`
+  // children of the section grid and must stay direct children of it.
+  const sidebarReveal = useRevealProps();
+  const resultsReveal = useRevealProps(100);
+
   // Filter and search states
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -155,7 +164,7 @@ export const Projects: React.FC = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               onClick={handleClose}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] cursor-pointer"
+              className="fixed inset-0 bg-overlay backdrop-blur-sm z-[100] cursor-pointer"
             />
           )}
         </AnimatePresence>
@@ -214,16 +223,16 @@ export const Projects: React.FC = () => {
                       alt={selectedProject.title}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E1B2E]/60 via-transparent to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-surface-inverse-deep/60 via-transparent to-transparent pointer-events-none" />
                     
                     {/* Interactive ping metrics badge */}
-                    <div className="absolute top-4 left-4 font-mono text-[10px] font-bold text-white px-2.5 py-1 rounded-full bg-accent-secondary flex items-center space-x-1 shadow-md">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping mr-0.5" />
+                    <div className="absolute top-4 left-4 font-mono text-[10px] font-bold text-on-accent px-2.5 py-1 rounded-full bg-accent-secondary flex items-center space-x-1 shadow-md">
+                      <span className="w-1.5 h-1.5 rounded-full bg-on-accent animate-ping mr-0.5" />
                       <span>{selectedProject.stats}</span>
                     </div>
                     
                     <div className="absolute bottom-4 left-4">
-                      <span className="px-2.5 py-1 bg-black/60 backdrop-blur-md rounded text-[10px] font-black uppercase text-accent-secondary tracking-widest leading-none">
+                      <span className="px-2.5 py-1 bg-overlay backdrop-blur-md rounded text-[10px] font-black uppercase text-accent-secondary tracking-widest leading-none">
                         {selectedProject.category}
                       </span>
                     </div>
@@ -231,7 +240,7 @@ export const Projects: React.FC = () => {
 
                   {/* Content panel */}
                   <div className="p-6 text-left">
-                    <h4 className="font-display text-lg font-extrabold text-[#0E1B2E] dark:text-text-primary tracking-tight leading-snug">
+                    <h4 className="font-display text-lg font-extrabold text-text-primary tracking-tight leading-snug">
                       {selectedProject.title}
                     </h4>
                     <p className="font-sans text-[13px] text-text-secondary leading-relaxed mt-2.5 line-clamp-3">
@@ -272,14 +281,14 @@ export const Projects: React.FC = () => {
                 overflow: 'hidden',
               }}
             >
-              <div className="w-full h-full p-6 md:p-8 flex flex-col justify-between bg-bg-elevated rounded-2xl border border-border-subtle shadow-[0_20px_50px_rgba(14,27,46,0.15)] relative overflow-hidden text-left">
+              <div className="w-full h-full p-6 md:p-8 flex flex-col justify-between bg-bg-elevated rounded-2xl border border-border-subtle shadow-[0_20px_50px_var(--ui-shadow-color)] relative overflow-hidden text-left">
                 {/* Close Button top-right */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleClose();
                   }}
-                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-bg-primary border border-border-subtle flex items-center justify-center text-text-secondary hover:text-[#dc2626] hover:border-[#dc2626] cursor-pointer transition-all active:scale-95 z-20"
+                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-bg-primary border border-border-subtle flex items-center justify-center text-text-secondary hover:text-status-danger hover:border-status-danger cursor-pointer transition-all active:scale-95 z-20"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -291,7 +300,7 @@ export const Projects: React.FC = () => {
                     <span className="font-mono text-[10px] font-bold text-accent-secondary uppercase tracking-[0.15em] block mb-1">
                       System Architecture Deep-Dive
                     </span>
-                    <h3 className="font-display text-2xl md:text-3xl font-extrabold text-[#0E1B2E] dark:text-text-primary tracking-tight">
+                    <h3 className="font-display text-2xl md:text-3xl font-extrabold text-text-primary tracking-tight">
                       {selectedProject.title}
                     </h3>
                   </div>
@@ -321,7 +330,7 @@ export const Projects: React.FC = () => {
                       </p>
                       <div>
                         <a
-                          href={selectedProject.applyUrl || "https://docs.google.com/forms/d/e/1FAIpQLSd3Aj_10MRloCjjvdpF_HnvoOI8poBr6LveJTUvKTZkrhiDuA/viewform?usp=header"}
+                          href={selectedProject.applyUrl || PROJECT_APPLICATION_URL}
                           target="_blank"
                           rel="noreferrer"
                           className="font-sans text-xs font-bold text-accent-primary hover:underline hover:text-accent-primary-hover inline-flex items-center space-x-1"
@@ -368,7 +377,7 @@ export const Projects: React.FC = () => {
                       {/* Step 2 */}
                       <div className="p-3 bg-bg-secondary/40 border border-border-subtle rounded-lg flex flex-col justify-between items-start space-y-1 relative">
                         <span className="absolute top-1.5 right-1.5 text-[8.5px] font-mono text-text-muted font-bold">02</span>
-                        <span className="text-[8px] font-black uppercase text-orange-500 tracking-widest leading-none">Embeddings</span>
+                        <span className="text-[8px] font-black uppercase text-status-warning tracking-widest leading-none">Embeddings</span>
                         <span className="font-display font-bold text-[11px] text-text-primary leading-tight">VectorDB Ingest</span>
                         <p className="font-sans text-[10px] text-text-secondary leading-tight mt-0.5">Transforming inputs into dense vectors.</p>
                       </div>
@@ -376,7 +385,7 @@ export const Projects: React.FC = () => {
                       {/* Step 3 */}
                       <div className="p-3 bg-bg-secondary/40 border border-border-subtle rounded-lg flex flex-col justify-between items-start space-y-1 relative">
                         <span className="absolute top-1.5 right-1.5 text-[8.5px] font-mono text-text-muted font-bold">03</span>
-                        <span className="text-[8px] font-black uppercase text-green-500 tracking-widest leading-none">Model Layer</span>
+                        <span className="text-[8px] font-black uppercase text-status-success tracking-widest leading-none">Model Layer</span>
                         <span className="font-display font-bold text-[11px] text-text-primary leading-tight">Core Inference</span>
                         <p className="font-sans text-[10px] text-text-secondary leading-tight mt-0.5">Pulsing model computations live.</p>
                       </div>
@@ -384,7 +393,7 @@ export const Projects: React.FC = () => {
                       {/* Step 4 */}
                       <div className="p-3 bg-bg-secondary/40 border border-border-subtle rounded-lg flex flex-col justify-between items-start space-y-1 relative">
                         <span className="absolute top-1.5 right-1.5 text-[8.5px] font-mono text-text-muted font-bold">04</span>
-                        <span className="text-[8px] font-black uppercase text-purple-500 tracking-widest leading-none">Client UI</span>
+                        <span className="text-[8px] font-black uppercase text-accent-tertiary tracking-widest leading-none">Client UI</span>
                         <span className="font-display font-bold text-[11px] text-text-primary leading-tight">Dashboards</span>
                         <p className="font-sans text-[10px] text-text-secondary leading-tight mt-0.5">Connecting endpoints for student apps.</p>
                       </div>
@@ -401,7 +410,7 @@ export const Projects: React.FC = () => {
                         <div key={idx} className="flex items-start space-x-2.5 text-xs">
                           <div className={`mt-0.5 w-4 h-4 rounded-full shrink-0 flex items-center justify-center font-bold text-[8px] ${
                             m.status === 'Completed' 
-                              ? 'bg-green-500/15 text-green-600 border border-green-500/20' 
+                              ? 'bg-status-success/15 text-status-success border border-status-success/20' 
                               : 'bg-accent-primary/15 text-accent-primary border border-accent-primary/20 animate-pulse'
                           }`}>
                             {m.status === 'Completed' ? '✓' : '•'}
@@ -410,7 +419,7 @@ export const Projects: React.FC = () => {
                             <div className="flex items-center space-x-2">
                               <span className="font-bold text-text-primary">{m.phase}</span>
                               <span className={`text-[8.5px] uppercase font-black tracking-widest ${
-                                m.status === 'Completed' ? 'text-green-500' : 'text-accent-primary'
+                                m.status === 'Completed' ? 'text-status-success' : 'text-accent-primary'
                               }`}>{m.status}</span>
                             </div>
                             <p className="text-text-secondary text-[11px] mt-0.5 leading-snug">{m.details}</p>
@@ -424,7 +433,7 @@ export const Projects: React.FC = () => {
                 {/* Actions Row */}
                 <div className="border-t border-border-subtle/50 pt-4 flex flex-wrap items-center justify-between gap-3 bg-bg-elevated mt-2">
                   <span className="font-mono text-[10px] text-text-muted">
-                    Reach out to Jordan Kim: jordan.kim@osu.edu
+                    Reach out to the officer team: {CLUB_EMAIL}
                   </span>
                   <div className="flex space-x-2">
                     <button
@@ -435,10 +444,10 @@ export const Projects: React.FC = () => {
                       <span>Sandbox Code</span>
                     </button>
                     <a
-                      href={selectedProject.applyUrl || "https://docs.google.com/forms/d/e/1FAIpQLSd3Aj_10MRloCjjvdpF_HnvoOI8poBr6LveJTUvKTZkrhiDuA/viewform?usp=header"}
+                      href={selectedProject.applyUrl || PROJECT_APPLICATION_URL}
                       target="_blank"
                       rel="noreferrer"
-                      className="h-9 px-3.5 rounded-lg bg-accent-primary hover:bg-accent-primary-hover text-white font-sans text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer shadow-sm inline-flex justify-center items-center"
+                      className="h-9 px-3.5 rounded-lg bg-accent-primary hover:bg-accent-primary-hover text-on-accent font-sans text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer shadow-sm inline-flex justify-center items-center"
                     >
                       <span>Apply for this Team</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -458,17 +467,17 @@ export const Projects: React.FC = () => {
     <div id="projects-page-root" className="pt-[72px] bg-bg-primary min-h-screen select-none">
       
       {/* 1. HERO HEADER INTRO */}
-      <section id="projects-hero-banner" className="py-20 md:py-24 bg-gradient-to-b from-[#EEF2F9] to-bg-primary border-b border-border-subtle relative overflow-hidden">
+      <section id="projects-hero-banner" className="py-20 md:py-24 bg-gradient-to-b from-bg-secondary to-bg-primary border-b border-border-subtle relative overflow-hidden">
         {/* Decorative elements representing AI connections */}
         <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
         <div className="absolute top-[20%] right-[10%] w-72 h-72 bg-accent-primary/5 rounded-full blur-3xl pointer-events-none" />
         
         <div className="max-w-7xl mx-auto px-6 md:px-16 relative z-10 flex flex-col items-center">
-          <div className="max-w-3xl text-center">
+          <div className="max-w-3xl text-center" {...heroReveal}>
             <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.2em] block mb-3">
               Student-Led Innovation
             </span>
-            <h1 className="font-display text-[38px] md:text-[54px] font-extrabold text-[#0E1B2E] dark:text-text-primary tracking-tight leading-[1.1]">
+            <h1 className="font-display text-[38px] md:text-[54px] font-extrabold text-text-primary tracking-tight leading-[1.1]">
               <TextScramble id="projects-title-scramble" text="The Projects Incubator" />
             </h1>
             <p className="font-sans text-[16px] md:text-[18px] text-text-secondary leading-relaxed mt-4 max-w-2xl mx-auto">
@@ -477,13 +486,13 @@ export const Projects: React.FC = () => {
           </div>
 
           {/* Quick Stats Counter strip */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-14 pt-8 border-t border-border-subtle/70">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-14 pt-8 border-t border-border-subtle/70" {...heroStatsReveal}>
             <div className="flex items-center space-x-3.5">
               <div className="w-10 h-10 rounded-xl bg-accent-primary-dim text-accent-primary flex items-center justify-center font-bold">
                 <Code2 className="w-5 h-5" />
               </div>
               <div>
-                <span className="block font-mono text-2xl font-black text-[#0E1B2E] dark:text-text-primary">4 Active</span>
+                <span className="block font-mono text-2xl font-black text-text-primary">4 Active</span>
                 <span className="text-[11px] uppercase font-bold text-text-muted tracking-wider block">Core Pipelines</span>
               </div>
             </div>
@@ -493,27 +502,27 @@ export const Projects: React.FC = () => {
                 <Users className="w-5 h-5" />
               </div>
               <div>
-                <span className="block font-mono text-2xl font-black text-[#0E1B2E] dark:text-text-primary">28 Total</span>
+                <span className="block font-mono text-2xl font-black text-text-primary">28 Total</span>
                 <span className="text-[11px] uppercase font-bold text-text-muted tracking-wider block">Sprint Programmers</span>
               </div>
             </div>
 
             <div className="flex items-center space-x-3.5">
-              <div className="w-10 h-10 rounded-xl bg-green-500/10 text-green-600 flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-xl bg-status-success/10 text-status-success flex items-center justify-center font-bold">
                 <Database className="w-5 h-5" />
               </div>
               <div>
-                <span className="block font-mono text-2xl font-black text-[#0E1B2E] dark:text-text-primary">100k+</span>
+                <span className="block font-mono text-2xl font-black text-text-primary">100k+</span>
                 <span className="text-[11px] uppercase font-bold text-text-muted tracking-wider block">Training Tokens</span>
               </div>
             </div>
 
             <div className="flex items-center space-x-3.5">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-xl bg-accent-tertiary/10 text-accent-tertiary flex items-center justify-center font-bold">
                 <Rocket className="w-5 h-5" />
               </div>
               <div>
-                <span className="block font-mono text-2xl font-black text-[#0E1B2E] dark:text-text-primary">100%</span>
+                <span className="block font-mono text-2xl font-black text-text-primary">100%</span>
                 <span className="text-[11px] uppercase font-bold text-text-muted tracking-wider block">Open-Source Code</span>
               </div>
             </div>
@@ -525,7 +534,7 @@ export const Projects: React.FC = () => {
       <section id="projects-browser-hub" className="py-24 bg-bg-primary max-w-7xl mx-auto px-6 md:px-16 grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
         
         {/* Left Column Filters (1 Col) */}
-        <div id="filter-controls-sidebar" className="lg:col-span-1 border border-border-subtle rounded-2xl p-6 bg-bg-elevated/40 backdrop-blur-sm sticky top-24 self-start space-y-6">
+        <div id="filter-controls-sidebar" className="lg:col-span-1 border border-border-subtle rounded-2xl p-6 bg-bg-elevated/40 backdrop-blur-sm sticky top-24 self-start space-y-6" {...sidebarReveal}>
           <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
             <h3 className="font-display font-black text-[15px] text-text-primary uppercase tracking-wide flex items-center space-x-2">
               <SlidersHorizontal className="w-4 h-4 text-accent-primary" />
@@ -592,7 +601,7 @@ export const Projects: React.FC = () => {
                   onClick={() => setSelectedTag(tag)}
                   className={`px-2.5 py-1.5 rounded-md font-mono text-[10px] font-bold cursor-pointer transition-all border ${
                     selectedTag === tag
-                      ? 'bg-accent-primary text-white border-accent-primary'
+                      ? 'bg-accent-primary text-on-accent border-accent-primary'
                       : 'bg-bg-primary text-text-secondary border-border-subtle hover:border-text-muted'
                   }`}
                 >
@@ -603,14 +612,14 @@ export const Projects: React.FC = () => {
           </div>
 
           {/* Quick Notice */}
-          <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/10 text-[11px] text-text-muted leading-relaxed">
-            <span className="font-bold text-[#E28026] uppercase block mb-1">Weekly Standups</span>
+          <div className="p-4 rounded-xl bg-status-warning/5 border border-status-warning/10 text-[11px] text-text-muted leading-relaxed">
+            <span className="font-bold text-status-warning uppercase block mb-1">Weekly Standups</span>
             Our project teams assemble weekly in {MEETING_LOCATION} on {MEETING_DAY} at {MEETING_TIME}. Attendees receive hardware credits and technical coaching.
           </div>
         </div>
 
         {/* Right Column Project Cards Grid (3 Cols) */}
-        <div id="projects-presentation-grid" className="lg:col-span-3 space-y-8">
+        <div id="projects-presentation-grid" className="lg:col-span-3 space-y-8" {...resultsReveal}>
           
           <div className="flex items-center justify-between">
             <span className="font-mono text-xs font-bold text-text-muted">
@@ -630,27 +639,22 @@ export const Projects: React.FC = () => {
                   setSelectedCategory('All');
                   setSelectedTag('All');
                 }}
-                className="mt-5 h-9 px-4 rounded-full bg-accent-primary text-white font-sans text-xs font-semibold cursor-pointer shadow-sm hover:bg-accent-primary-hover"
+                className="mt-5 h-9 px-4 rounded-full bg-accent-primary text-on-accent font-sans text-xs font-semibold cursor-pointer shadow-sm hover:bg-accent-primary-hover"
               >
                 Clear Filters
               </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredProjects.map((proj) => {
-                if (selectedProject && selectedProject.id === proj.id) {
-                  return (
-                    <div
-                      key={proj.id}
-                      className="h-[420px]"
-                      style={{ visibility: 'hidden' }}
-                    />
-                  );
-                }
-
+              {filteredProjects.map((proj, idx) => {
                 return (
+                  // Reveal stays mounted across the placeholder swap below, so
+                  // closing the modal does not replay the card's reveal.
+                  <Reveal key={proj.id} delay={staggerDelay(idx)}>
+                  {selectedProject && selectedProject.id === proj.id ? (
+                    <div className="h-[420px]" style={{ visibility: 'hidden' }} />
+                  ) : (
                   <div
-                    key={proj.id}
                     ref={(el) => {
                       cardsRef.current[proj.id] = el as HTMLDivElement;
                     }}
@@ -667,16 +671,16 @@ export const Projects: React.FC = () => {
                           alt={proj.title}
                           className="w-full h-full object-cover group-hover:scale-[1.03] transition-all duration-500"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0E1B2E]/60 via-transparent to-transparent pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-surface-inverse-deep/60 via-transparent to-transparent pointer-events-none" />
                         
                         {/* Interactive ping metrics badge */}
-                        <div className="absolute top-4 left-4 font-mono text-[10px] font-bold text-white px-2.5 py-1 rounded-full bg-accent-secondary flex items-center space-x-1 shadow-md">
-                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping mr-0.5" />
+                        <div className="absolute top-4 left-4 font-mono text-[10px] font-bold text-on-accent px-2.5 py-1 rounded-full bg-accent-secondary flex items-center space-x-1 shadow-md">
+                          <span className="w-1.5 h-1.5 rounded-full bg-on-accent animate-ping mr-0.5" />
                           <span>{proj.stats}</span>
                         </div>
                         
                         <div className="absolute bottom-4 left-4">
-                          <span className="px-2.5 py-1 bg-black/60 backdrop-blur-md rounded text-[10px] font-black uppercase text-accent-secondary tracking-widest leading-none">
+                          <span className="px-2.5 py-1 bg-overlay backdrop-blur-md rounded text-[10px] font-black uppercase text-accent-secondary tracking-widest leading-none">
                             {proj.category}
                           </span>
                         </div>
@@ -684,7 +688,7 @@ export const Projects: React.FC = () => {
 
                       {/* Content panel */}
                       <div className="p-6">
-                        <h4 className="font-display text-lg font-extrabold text-[#0E1B2E] dark:text-text-primary tracking-tight leading-snug group-hover:text-accent-primary transition-colors">
+                        <h4 className="font-display text-lg font-extrabold text-text-primary tracking-tight leading-snug group-hover:text-accent-primary transition-colors">
                           {proj.title}
                         </h4>
                         <p className="font-sans text-[13px] text-text-secondary leading-relaxed mt-2.5 line-clamp-3">
@@ -708,6 +712,8 @@ export const Projects: React.FC = () => {
                       </span>
                     </div>
                   </div>
+                  )}
+                  </Reveal>
                 );
               })}
             </div>

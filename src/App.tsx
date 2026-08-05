@@ -6,6 +6,7 @@ import { About } from './pages/About';
 import { Events } from './pages/Events';
 import { HackAI } from './pages/HackAI';
 import { Projects } from './pages/Projects';
+import { GetInvolved } from './pages/GetInvolved';
 import { SmoothScrollProvider } from './components/SmoothScrollProvider';
 import { PageTransition } from './components/PageTransition';
 
@@ -24,6 +25,8 @@ export default function App() {
         return <HackAI />;
       case 'projects':
         return <Projects />;
+      case 'getinvolved':
+        return <GetInvolved onNavigate={setActivePage} />;
       default:
         return <Home onNavigate={setActivePage} />;
     }
@@ -35,13 +38,15 @@ export default function App() {
       <Navbar activePage={activePage} onNavigate={setActivePage} />
 
       <SmoothScrollProvider>
-        {/* Dynamic Client Page Layout with Directional Transition */}
-        <main id="main-content-flow" className="w-full">
-          <PageTransition activePage={activePage} renderPage={renderActivePage} />
-        </main>
-
-        {/* Unified professional bottom footer */}
-        <Footer activePage={activePage} onNavigate={setActivePage} />
+        {/* Dynamic Client Page Layout with Directional Transition.
+            The footer is passed in rather than rendered as a sibling so it
+            animates together with the page instead of sitting frozen on screen
+            while the scroll position resets. */}
+        <PageTransition
+          activePage={activePage}
+          renderPage={renderActivePage}
+          footer={<Footer activePage={activePage} onNavigate={setActivePage} />}
+        />
       </SmoothScrollProvider>
     </div>
   );

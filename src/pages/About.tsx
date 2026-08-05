@@ -7,12 +7,16 @@ import { Linkedin, Github, Twitter, Globe, X, Sparkles, Trophy, Award } from 'lu
 import { AboutSection } from '../components/AboutSection';
 import { FAQ } from '../components/FAQ';
 import { TextScramble } from '../components/TextScramble';
+import { Reveal } from '../components/Reveal';
+import { useRevealProps, staggerDelay } from '../hooks/useReveal';
 
 interface AboutProps {
   onNavigate?: (page: string) => void;
 }
 
 export const About: React.FC<AboutProps> = ({ onNavigate }) => {
+  const heroReveal = useRevealProps();
+  const officersHeaderReveal = useRevealProps();
   const [expandedOfficer, setExpandedOfficer] = useState<Officer | null>(null);
   const [animState, setAnimState] = useState<'idle' | 'starting' | 'active' | 'closing'>('idle');
   const [initialRect, setInitialRect] = useState<DOMRect | null>(null);
@@ -87,7 +91,7 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               onClick={handleClose}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] cursor-pointer"
+              className="fixed inset-0 bg-overlay backdrop-blur-sm z-[100] cursor-pointer"
             />
           )}
         </AnimatePresence>
@@ -139,9 +143,9 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
               <div className="w-full h-full rounded-2xl bg-bg-elevated border border-border-subtle shadow-card flex flex-col justify-between overflow-hidden">
                 {/* Image at Top */}
                 <div className="w-full h-[280px] overflow-hidden relative border-b border-border-subtle/50 bg-bg-secondary flex items-center justify-center shrink-0">
-                  {expandedOfficer.photoUrl ? (
+                  {expandedOfficer.photo ? (
                     <img
-                      src={expandedOfficer.photoUrl}
+                      src={expandedOfficer.photo}
                       alt={expandedOfficer.name}
                       referrerPolicy="no-referrer"
                       className="w-full h-full object-cover"
@@ -152,7 +156,7 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
                     </div>
                   )}
                   {/* Academic Year Badge */}
-                  <div className="absolute top-2.5 right-2.5 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-full text-[8px] font-bold text-accent-secondary tracking-widest uppercase border border-border-subtle/10">
+                  <div className="absolute top-2.5 right-2.5 px-2 py-0.5 bg-overlay backdrop-blur-md rounded-full text-[8px] font-bold text-accent-secondary tracking-widest uppercase border border-border-subtle/10">
                     {expandedOfficer.year}
                   </div>
                 </div>
@@ -211,10 +215,10 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
 
                 {/* Top row: Portrait photo and basic details */}
                 <div className="flex items-center gap-4 mt-1 row-top-profile shrink-0">
-                  {expandedOfficer.photoUrl ? (
+                  {expandedOfficer.photo ? (
                     <div className="w-14 h-14 rounded-xl overflow-hidden border border-border-subtle shrink-0">
                       <img
-                        src={expandedOfficer.photoUrl}
+                        src={expandedOfficer.photo}
                         alt={expandedOfficer.name}
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover"
@@ -318,9 +322,9 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
         id="about-hero-header"
         className="py-20 md:py-28 relative overflow-hidden flex items-center justify-center text-center border-b border-border-subtle"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(0,168,120,0.06)_0%,transparent_50%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,var(--ui-accent-secondary-dim)_0%,transparent_50%)] pointer-events-none" />
         
-        <div className="max-w-3xl mx-auto px-6 relative z-10 flex flex-col items-center">
+        <div className="max-w-3xl mx-auto px-6 relative z-10 flex flex-col items-center" {...heroReveal}>
           <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.25em] block mb-4">
             Our Story & Vision
           </span>
@@ -328,7 +332,7 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
             <TextScramble id="about-title-scramble" text="About Us" />
           </h1>
           <p className="font-sans text-[16px] md:text-[18px] text-text-secondary leading-relaxed max-w-2xl">
-            A cohesive coalition of computer scientists, data analysts, and engineering minds passionate about bridging the threshold between deep algorithmic theory and real-world deployment.
+            We are a community of students and researchers passionate about bringing people together to collaborate on algorithmic theory, real-world deployment, and safety in Artificial Intelligence.
           </p>
         </div>
       </section>
@@ -340,7 +344,7 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
       <section id="officers-list-section" className="py-24 bg-bg-secondary border-t border-border-subtle relative">
 
         <div className="max-w-7xl mx-auto px-6 md:px-16">
-          <div id="officers-header" className="mb-14 text-center">
+          <div id="officers-header" className="mb-14 text-center" {...officersHeaderReveal}>
             <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.2em] block mb-3">
               Leadership
             </span>
@@ -354,21 +358,18 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
 
           {/* Officers 3D Responsive Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8 justify-items-center">
-            {OFFICERS.map((off) => {
+            {OFFICERS.map((off, idx) => {
               const isBeingExpanded = expandedOfficer?.id === off.id;
-                           if (isBeingExpanded && animState !== 'idle') {
-                return (
-                  <div
-                    key={off.id}
-                    className="w-[300px] h-[380px]"
-                    style={{ visibility: 'hidden' }}
-                  />
-                );
-              }
 
               return (
+                // The Reveal stays mounted across the placeholder swap below. If it
+                // unmounted along with the card, closing the modal would replay the
+                // card's reveal animation.
+                <Reveal key={off.id} delay={staggerDelay(idx)}>
+                {isBeingExpanded && animState !== 'idle' ? (
+                  <div className="w-[300px] h-[380px]" style={{ visibility: 'hidden' }} />
+                ) : (
                 <div
-                  key={off.id}
                   ref={(el) => {
                     cardsRef.current[off.id] = el as HTMLDivElement;
                   }}
@@ -415,9 +416,9 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
                         <div className="w-full h-full rounded-2xl bg-bg-elevated border border-border-subtle hover:border-accent-primary/25 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between overflow-hidden">
                           {/* Image at Top */}
                           <div className="w-full h-[280px] overflow-hidden relative border-b border-border-subtle/50 bg-bg-secondary flex items-center justify-center shrink-0">
-                            {off.photoUrl ? (
+                            {off.photo ? (
                               <img
-                                src={off.photoUrl}
+                                src={off.photo}
                                 alt={off.name}
                                 referrerPolicy="no-referrer"
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -428,7 +429,7 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
                               </div>
                             )}
                             {/* Academic Year Badge */}
-                            <div className="absolute top-2.5 right-2.5 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-full text-[8px] font-bold text-accent-secondary tracking-widest uppercase border border-border-subtle/10">
+                            <div className="absolute top-2.5 right-2.5 px-2 py-0.5 bg-overlay backdrop-blur-md rounded-full text-[8px] font-bold text-accent-secondary tracking-widest uppercase border border-border-subtle/10">
                               {off.year}
                             </div>
                           </div>
@@ -460,6 +461,8 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
                     </div>
                   </div>
                 </div>
+                )}
+                </Reveal>
               );
             })}
           </div>

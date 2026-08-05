@@ -1,41 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NeuralNetworkCanvas } from '../components/NeuralNetworkCanvas';
+import { CanvasErrorBoundary } from '../components/CanvasErrorBoundary';
 import { StatsBar } from '../components/StatsBar';
 import { MissionStatement } from '../components/MissionStatement';
 import { SponsorsBar } from '../components/SponsorsBar';
-import { AboutSection } from '../components/AboutSection';
 import { HackAITeaser } from '../components/HackAITeaser';
 import { TextScramble } from '../components/TextScramble';
-import { PROJECTS, MEETING_DAY, MEETING_TIME, MEETING_LOCATION } from '../data';
-import { FolderGit2, Sparkles, Code2, ArrowRight, Clock } from 'lucide-react';
+import { MEETING_DAY, MEETING_TIME, MEETING_LOCATION } from '../data';
+import { Clock } from 'lucide-react';
+import { useRevealProps } from '../hooks/useReveal';
 
 interface HomeProps {
   onNavigate: (page: string) => void;
 }
 
 export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
-  const [selectedTag, setSelectedTag] = useState<string>('All');
-  const [isDesktop, setIsDesktop] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth >= 1024;
-    }
-    return true;
-  });
-
-  React.useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
-  // Extract all unique tags
-  const allTags = ['All', ...Array.from(new Set(PROJECTS.flatMap(p => p.tags)))].slice(0, 7);
-
-  const filteredProjects = selectedTag === 'All'
-    ? PROJECTS
-    : PROJECTS.filter(p => p.tags.includes(selectedTag));
+  const heroReveal = useRevealProps();
+  const mobileHeroReveal = useRevealProps();
 
   return (
     <div id="homepage-root">
@@ -50,7 +31,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
 
         {/* Full-width 3D Backdrop - pointer events mapped explicitly */}
         <div className="absolute inset-0 w-full h-full z-0">
-          <NeuralNetworkCanvas />
+          <CanvasErrorBoundary>
+            <NeuralNetworkCanvas />
+          </CanvasErrorBoundary>
         </div>
 
         {/* Text Content Overlay Layer */}
@@ -59,6 +42,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
           <div
             id="hero-left-col"
             className="flex flex-col items-start justify-center text-left py-12 lg:py-24 pr-0 lg:pr-8 max-w-2xl pointer-events-auto select-none"
+            {...heroReveal}
           >
             {/* Campus Eyebrow */}
             <div className="flex items-center space-x-2.5 mb-5 select-none">
@@ -95,10 +79,10 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
               <button
                 id="hero-primary-cta"
                 onClick={() => onNavigate('projects')}
-                className="h-[52px] px-8 bg-accent-primary hover:bg-accent-primary-hover text-white font-sans text-[15px] font-semibold rounded-full flex items-center space-x-2 shadow-[0_4px_20px_rgba(59,91,255,0.22)] hover:shadow-[0_8px_32px_rgba(59,91,255,0.32)] transform hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
+                className="h-[52px] px-8 bg-accent-primary hover:bg-accent-primary-hover text-on-accent font-sans text-[15px] font-semibold rounded-full flex items-center space-x-2 shadow-[0_4px_20px_var(--ui-accent-glow)] hover:shadow-[0_8px_32px_var(--ui-accent-glow)] transform hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
               >
                 <span>Explore Projects</span>
-                <span className="text-[18px] leading-zero mb-0.5">›</span>
+                <span className="text-[18px] leading-none mb-0.5">›</span>
               </button>
 
               <button
@@ -107,7 +91,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
                 className="h-[52px] px-8 bg-transparent hover:bg-accent-primary-dim border border-accent-primary text-accent-primary hover:border-accent-primary-hover font-sans text-[15px] font-semibold rounded-full flex items-center space-x-2 transform hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
               >
                 <span>Learn More</span>
-                <span className="text-[18px] leading-zero mb-0.5">›</span>
+                <span className="text-[18px] leading-none mb-0.5">›</span>
               </button>
             </div>
 
@@ -128,10 +112,10 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
       </section>
 
       {/* 2-8. OVERLAPPING CONTENT WRAPPER */}
-      <div className="relative z-10 bg-bg-primary shadow-[0_-15px_30px_rgba(14,27,46,0.06)] border-t border-border-subtle">
+      <div className="relative z-10 bg-bg-primary shadow-[0_-15px_30px_var(--ui-shadow-color)] border-t border-border-subtle">
         {/* Mobile/Tablet Hero Title Card - Displays at the top of the flowing content card wrapper, sliding gracefully up over the full 3D interactive backdrop */}
         <div className="block lg:hidden w-full max-w-7xl mx-auto px-6 md:px-16 py-16 md:py-24 border-b border-border-subtle bg-bg-primary">
-          <div className="flex flex-col items-start justify-center text-left max-w-2xl select-none">
+          <div className="flex flex-col items-start justify-center text-left max-w-2xl select-none" {...mobileHeroReveal}>
             {/* Campus Eyebrow */}
             <div className="flex items-center space-x-2.5 mb-5">
               <span className="w-1.5 h-1.5 rounded-full bg-accent-secondary" />
@@ -155,10 +139,10 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             <div className="flex flex-wrap items-center gap-4">
               <button
                 onClick={() => onNavigate('projects')}
-                className="h-[48px] px-6 bg-accent-primary hover:bg-accent-primary-hover text-white font-sans text-[14px] font-semibold rounded-full flex items-center space-x-2 shadow-[0_4px_20px_rgba(59,91,255,0.22)] transform hover:-translate-y-0.5 transition-all duration-200 cursor-pointer animate-none"
+                className="h-[48px] px-6 bg-accent-primary hover:bg-accent-primary-hover text-on-accent font-sans text-[14px] font-semibold rounded-full flex items-center space-x-2 shadow-[0_4px_20px_var(--ui-accent-glow)] transform hover:-translate-y-0.5 transition-all duration-200 cursor-pointer animate-none"
               >
                 <span>Explore Projects</span>
-                <span className="text-[16px] leading-zero mb-0.5">›</span>
+                <span className="text-[16px] leading-none mb-0.5">›</span>
               </button>
 
               <button
@@ -166,7 +150,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
                 className="h-[48px] px-6 bg-transparent hover:bg-accent-primary-dim border border-accent-primary text-accent-primary hover:border-accent-primary-hover font-sans text-[14px] font-semibold rounded-full flex items-center space-x-2 transform hover:-translate-y-0.5 transition-all duration-250 cursor-pointer"
               >
                 <span>Learn More</span>
-                <span className="text-[16px] leading-zero mb-0.5">›</span>
+                <span className="text-[16px] leading-none mb-0.5">›</span>
               </button>
             </div>
           </div>

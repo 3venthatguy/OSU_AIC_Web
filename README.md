@@ -2,6 +2,10 @@
 
 An elegant, high-performance, and feature-rich official web application for the **Artificial Intelligence Club at Ohio State (AI @ OSU)**. This platform serves as the central hub for student-led innovation, workshops, academic events, the semi-annual Projects Incubator, and the premier annual HackAI event.
 
+> 📚 **Developer & AI-agent documentation lives in [`docs/`](docs/README.md).**
+> Editing site content? Go straight to [`docs/content-and-data.md`](docs/content-and-data.md) — nearly
+> every string, date, link, and roster on the site is a named export of [`src/data.ts`](src/data.ts).
+
 ---
 
 ## 🎨 Creative Architecture & Key Features
@@ -19,7 +23,7 @@ An elegant, high-performance, and feature-rich official web application for the 
 
 This application is built using modern frontend technologies optimized for stability, performance, and type-safety:
 
-*   **Runtime & Framework**: [React 18](https://react.dev/) + [Vite](https://vite.dev/) (Client-side single-page architecture)
+*   **Runtime & Framework**: [React 19](https://react.dev/) + [Vite](https://vite.dev/) (Client-side single-page architecture)
 *   **Programming Language**: [TypeScript](https://www.typescriptlang.org/) (Strict compilation guidelines)
 *   **Styling Engine**: [Tailwind CSS v4](https://tailwindcss.com/)
 *   **Animations Utility**: [Motion Framework](https://motion.dev/)

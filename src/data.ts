@@ -1,5 +1,20 @@
 import { Officer, ClubEvent, ProjectItem } from './types';
 
+// Officer headshots are bundled assets, not remote URLs: hotlinked CDN images
+// (LinkedIn in particular) carry signed expiry params and go dead without warning.
+// Drop a square crop into assets/profiles/, import it here, and set `photo`.
+import evanMengesPhoto from '../assets/profiles/evan-menges.png';
+
+export const CLUB_EMAIL = "osuaiclub@gmail.com";
+export const CLUB_DISCORD_URL = "https://discord.com/invite/GPCmTECWRu";
+export const CLUB_INSTAGRAM_URL = "http://www.instagram.com/ohiostateaiclub";
+export const CLUB_LINKEDIN_URL = "https://www.linkedin.com/company/artificial-intelligence-club/about/";
+export const NEWSLETTER_URL = "https://go.osu.edu/aiclub";
+
+/** Shared Google Form backing both project-team and HackAI signups. */
+export const PROJECT_APPLICATION_URL = "https://docs.google.com/forms/d/e/1FAIpQLSd3Aj_10MRloCjjvdpF_HnvoOI8poBr6LveJTUvKTZkrhiDuA/viewform?usp=header";
+export const HACKAI_REGISTRATION_URL = PROJECT_APPLICATION_URL;
+
 export const MEETING_LOCATION = "Enarson 258";
 export const MEETING_DAY = "Wednesdays";
 export const MEETING_TIME = "7:00 PM";
@@ -13,93 +28,100 @@ export const HACKAI_LOCATION_FULL = "Fontana Lab";
 export const HACKAI_DATE_SHORT = "FEB 20–21";
 export const HACKAI_BANNER_BADGE = `✦ ${HACKAI_DATE_BADGE} — ${HACKAI_LOCATION_BADGE}`;
 
+// NOTE: bios below are neutral role descriptions. Replace them with copy each
+// officer has written and approved — do not invent internships, labs or research
+// interests for a named person.
 export const OFFICERS: Officer[] = [
   {
     id: 'anirudh-chinthagunta',
     name: 'Anirudh Chinthagunta',
     role: 'President',
     major: 'Computer Science & Engineering',
-    year: '3th Year',
+    year: '3rd Year',
     initials: 'AC',
-    bio: 'Alex leads the club\'s strategic direction and coordinates between all officer teams. Passionate about reinforcement learning and autonomous systems. Previously interned at DeepMind.',
-    photoUrl: 'https://media.licdn.com/dms/image/v2/D4E03AQHT7NV2FXNTfg/profile-displayphoto-crop_800_800/B4EZtM8UdLGkAI-/0/1766522439965?e=1782345600&v=beta&t=9SeBeSZBDnh0n3WBsmQGReMtc-p0ckOVffqQiu5FR0s',
+    bio: 'Leads the club\'s strategic direction and coordinates between all officer teams.',
     socials: {
       linkedin: 'https://www.linkedin.com/in/anirudh-chinthagunta/',
     }
   },
   {
-    id: 'maya-patel',
-    name: 'Maya Patel',
+    id: 'vice-president-tbd',
+    name: 'TBD',
     role: 'Vice President',
+    major: 'TBD',
+    year: 'TBD',
+    initials: 'VP',
+    bio: 'Oversees member onboarding and workshop programming. This seat is open — see the Events page for how to get involved.',
+    socials: {}
+  },
+  {
+    id: 'maanov-jajodia',
+    name: 'Maanov Jajodia',
+    role: 'Treasurer',
+    major: 'CSE + Math',
+    year: '3rd Year',
+    initials: 'MJ',
+    bio: 'Manages the club budget, sponsor funding, and reimbursements for events and project teams.',
+    socials: {}
+  },
+  {
+    id: 'cynthia-lm',
+    name: 'Cynthia Lm',
+    role: 'Chief Technology Officer',
     major: 'Data Analytics',
     minor: 'Cognitive Science',
     year: '3rd Year',
-    initials: 'MP',
-    bio: 'Maya oversees member onboarding and workshop programming. Her research focuses on fairness in ML systems. She loves hackathons and terrible puns.',
-    photoUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop',
-    socials: {
-      linkedin: 'https://linkedin.com/in/mayapatel',
-      github: 'https://github.com/mayapatel'
-    }
-  },
-  {
-    id: 'jordan-kim',
-    name: 'Jordan Kim',
-    role: 'Treasurer / Director of Projects',
-    major: 'CSE + Math',
-    year: '3rd Year',
-    initials: 'JK',
-    bio: 'Jordan organizes project teams each semester and mentors members through their first AI builds. Working on a graph neural network research project with OSU\'s NLP lab.',
-    photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop',
-    socials: {
-      linkedin: 'https://linkedin.com/in/jordankim',
-      github: 'https://github.com/jordankim'
-    }
+    initials: 'CL',
+    bio: 'Co-leads the club\'s technical programming, workshop curriculum, and semester project teams.',
+    socials: {}
   },
   {
     id: 'evan-menges',
     name: 'Evan Menges',
-    role: 'Chief Technical Officer',
+    role: 'Chief Technology Officer',
     major: 'Electrical Engineering + Economics',
     minor: 'Nuclear Engineering',
     year: '4th Year',
     initials: 'EM',
-    bio: 'Sam runs all logistics for HackAI, OSU\'s largest student AI hackathon. They are obsessed with LLM fine-tuning and making AI education more accessible.',
-    photoUrl: 'https://media.licdn.com/dms/image/v2/D5603AQFmH207C0whTQ/profile-displayphoto-crop_800_800/B56ZwBLPSOGYAI-/0/1769546249987?e=1782345600&v=beta&t=L0dsphXq7hoCRIehob3zKl0dLQkhbgRuIyft_9ArSVs',
-    socials: {
-      linkedin: 'https://linkedin.com/in/samtorres',
-      github: 'https://github.com/samtorres'
-    }
-  },
-  {
-    id: 'riley-zhang',
-    name: 'Riley Zhang',
-    role: 'Outreach Chair',
-    major: 'Electrical & Computer Engineering',
-    minor: 'Robotics & Autonomous Systems',
-    year: '2nd Year',
-    initials: 'RZ',
-    bio: 'Riley manages industry partnerships, sponsorships, and speaker invitations. Interested in computer vision for medical imaging.',
-    photoUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=400&auto=format&fit=crop',
+    bio: 'Co-leads the club\'s technical programming and maintains this website and the club\'s developer tooling.',
+    photo: evanMengesPhoto,
     socials: {
       linkedin: 'https://www.linkedin.com/in/evan-menges/',
       github: 'https://github.com/3venthatguy'
     }
   },
   {
-    id: 'morgan-lee',
-    name: 'Morgan Lee',
-    role: 'Treasurer',
+    id: 'harker-lecroy',
+    name: 'Harker LeCroy',
+    role: 'Chief Communications Officer',
+    major: 'Electrical & Computer Engineering',
+    minor: 'Robotics & Autonomous Systems',
+    year: '2nd Year',
+    initials: 'HL',
+    bio: 'Manages industry partnerships, sponsorships, and speaker invitations.',
+    socials: {}
+  },
+  {
+    id: 'sushmita-sudhan',
+    name: 'Sushmita Sudhan',
+    role: 'Marketing Officer',
     major: 'Information Systems',
     minor: 'Economics',
     year: '3rd Year',
-    initials: 'ML',
-    bio: 'Morgan handles the club\'s budget and manages sponsor relationships. Also runs a personal ML blog and is learning JAX.',
-    photoUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=400&auto=format&fit=crop',
-    socials: {
-      linkedin: 'https://linkedin.com/in/morganlee',
-      github: 'https://github.com/morganlee'
-    }
+    initials: 'SS',
+    bio: 'Runs the club\'s social channels, event promotion, and recruitment campaigns.',
+    socials: {}
+  },
+  {
+    id: 'mustafa-elshikh',
+    name: 'Mustafa Elshikh',
+    role: 'Marketing Officer',
+    major: 'Information Systems',
+    minor: 'Economics',
+    year: '3rd Year',
+    initials: 'ME',
+    bio: 'Runs the club\'s social channels, event promotion, and recruitment campaigns.',
+    socials: {}
   }
 ];
 
@@ -133,7 +155,7 @@ export const EVENTS: ClubEvent[] = [
   {
     id: 'hackai-opens',
     category: 'HackAI',
-    title: 'HackAI 2026 Registration Kickoff',
+    title: `${HACKAI_NAME} Registration Kickoff`,
     description: 'Learn everything about the HackAI prompt challenges, developer themes, and $12K team prizes. Grab early tickets and find team partners!',
     dateString: 'Nov 3, 2026',
     day: '03',
@@ -223,7 +245,7 @@ export const PROJECTS: ProjectItem[] = [
     tags: ['LLM', 'RAG', 'VectorDB', 'TypeScript'],
     stats: '500+ Daily Searches',
     image: 'https://images.unsplash.com/photo-1531746790731-6c087fecd50a?q=80&w=600&auto=format&fit=crop',
-    applyUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSd3Aj_10MRloCjjvdpF_HnvoOI8poBr6LveJTUvKTZkrhiDuA/viewform?usp=header'
+    applyUrl: PROJECT_APPLICATION_URL
   },
   {
     id: 'traffic-analysis',
@@ -233,7 +255,7 @@ export const PROJECTS: ProjectItem[] = [
     tags: ['PyTorch', 'YOLOnas', 'OpenCV', 'Docker'],
     stats: '94.2% Real-time Precision',
     image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=600&auto=format&fit=crop',
-    applyUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSd3Aj_10MRloCjjvdpF_HnvoOI8poBr6LveJTUvKTZkrhiDuA/viewform?usp=header'
+    applyUrl: PROJECT_APPLICATION_URL
   },
   {
     id: 'rl-quadcopter',
@@ -243,7 +265,7 @@ export const PROJECTS: ProjectItem[] = [
     tags: ['Reinforcement Learning', 'PyBullet', 'JAX'],
     stats: '2.4x Recovery Stabilization',
     image: 'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?q=80&w=600&auto=format&fit=crop',
-    applyUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSd3Aj_10MRloCjjvdpF_HnvoOI8poBr6LveJTUvKTZkrhiDuA/viewform?usp=header'
+    applyUrl: PROJECT_APPLICATION_URL
   },
   {
     id: 'bio-dna',
@@ -253,7 +275,7 @@ export const PROJECTS: ProjectItem[] = [
     tags: ['DNA-seq', 'Keras', 'Transformers', 'BioPython'],
     stats: 'SOTA Validation Bounds',
     image: 'https://images.unsplash.com/photo-1507413245164-6160d8298b31?q=80&w=600&auto=format&fit=crop',
-    applyUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSd3Aj_10MRloCjjvdpF_HnvoOI8poBr6LveJTUvKTZkrhiDuA/viewform?usp=header'
+    applyUrl: PROJECT_APPLICATION_URL
   }
 ];
 
@@ -276,7 +298,7 @@ export const FAQS = [
   },
   {
     q: "How can I participate in HackAI?",
-    a: "HackAI is open to all university students. Registration typically opens 2 months before the event (Feb/March). Check out our `/hackai` page for up-to-the-minute updates and prize structures."
+    a: `HackAI is open to all university students. Registration typically opens about 2 months before the event (${HACKAI_DATE_FULL}). Check out our HackAI page for up-to-the-minute updates and prize structures.`
   }
 ];
 

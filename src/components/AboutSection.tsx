@@ -1,11 +1,17 @@
 import React from 'react';
 import { Cpu, Eye, MessageSquare, HardDrive, BrainCircuit, Flag, Network } from 'lucide-react';
+import { Reveal } from './Reveal';
+import { useRevealProps, staggerDelay } from '../hooks/useReveal';
 
 interface AboutSectionProps {
   onNavigate: (page: string) => void;
 }
 
 export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate }) => {
+  // In-place props, not <Reveal>: these two are `lg:col-span-*` children of the
+  // 12-col grid and must stay direct children of it.
+  const infoReveal = useRevealProps();
+
   const categories = [
     { label: 'Machine Learning', icon: <Cpu className="w-10 h-10 text-accent-secondary" /> },
     { label: 'Computer Vision', icon: <Eye className="w-10 h-10 text-accent-secondary" /> },
@@ -21,7 +27,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate }) => {
       <div className="max-w-7xl mx-auto px-6 md:px-16 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
         
         {/* Left Side (55%) */}
-        <div id="about-teaser-info" className="lg:col-span-7 flex flex-col items-start pr-0 lg:pr-8">
+        <div id="about-teaser-info" className="lg:col-span-7 flex flex-col items-start pr-0 lg:pr-8" {...infoReveal}>
           
           {/* Eyebrow with preceding marker line */}
           <div className="flex items-center space-x-3 mb-6">
@@ -51,7 +57,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate }) => {
               <div
                 key={idx}
                 id={`teaser-feature-pill-${idx}`}
-                className="bg-bg-elevated/80 border border-border-subtle px-5 py-3 rounded-full flex items-center space-x-2.5 shadow-[0_2px_8px_rgba(14,27,46,0.03)] hover:border-accent-primary/20 transition-all duration-200"
+                className="bg-bg-elevated/80 border border-border-subtle px-5 py-3 rounded-full flex items-center space-x-2.5 shadow-[0_2px_8px_var(--ui-shadow-color)] hover:border-accent-primary/20 transition-all duration-200"
               >
                 {p.icon}
                 <span className="font-sans text-[13px] font-bold text-text-primary tracking-wide">
@@ -76,18 +82,21 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate }) => {
         {/* Right Side 2x2 grid (45%) */}
         <div id="about-teaser-grid" className="lg:col-span-5 grid grid-cols-2 gap-4 w-full">
           {categories.map((cat, idx) => (
+            // Wrapped rather than revealed in place: the tile carries
+            // `transform hover:-translate-y-1`, which an in-place reveal would override.
+            <Reveal key={idx} delay={staggerDelay(idx)}>
             <div
-              key={idx}
               id={`teaser-category-card-${idx}`}
               className="h-[180px] p-6 bg-bg-secondary hover:bg-bg-elevated border border-border-subtle hover:border-accent-secondary/35 rounded-2xl flex flex-col justify-between transition-all duration-300 transform hover:-translate-y-1 hover:shadow-card group"
             >
-              <div className="p-3 bg-bg-elevated group-hover:bg-bg-secondary w-fit rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-colors">
+              <div className="p-3 bg-bg-elevated group-hover:bg-bg-secondary w-fit rounded-xl shadow-[0_2px_8px_var(--ui-shadow-color)] transition-colors">
                 {cat.icon}
               </div>
               <span className="font-sans text-[13px] font-bold text-text-primary uppercase tracking-wider mb-1 block">
                 {cat.label}
               </span>
             </div>
+            </Reveal>
           ))}
         </div>
 

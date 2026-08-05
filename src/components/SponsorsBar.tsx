@@ -1,10 +1,7 @@
 import React from 'react';
-// @ts-ignore
-import lab99Logo from '../../assets/.aistudio/sponsors/99PLabs_Logo_Final.png';
-// @ts-ignore
-import ciscoLogo from '../../assets/.aistudio/sponsors/Cisco_logo_blue_2016.svg.png';
-// @ts-ignore
-import janeStreetLogo from '../../assets/.aistudio/sponsors/Jane_Street_Logo.png';
+import lab99Logo from '../../assets/sponsors/99PLabs_Logo_Final.png';
+import ciscoLogo from '../../assets/sponsors/Cisco_logo_blue_2016.svg.png';
+import janeStreetLogo from '../../assets/sponsors/Jane_Street_Logo.png';
 
 export const SponsorsBar: React.FC = () => {
   const sponsors = [
@@ -51,10 +48,13 @@ export const SponsorsBar: React.FC = () => {
             className="flex items-center space-x-8 animate-marquee cursor-pointer py-1"
           >
             {scrollingSponsors.map((sponsor, idx) => (
+              // The plate stays white in BOTH themes on purpose: sponsor logos are
+              // dark-on-transparent PNGs and would disappear on a charcoal tile.
+              // Only the border follows the theme.
               <div
                 key={idx}
                 id={`sponsor-logo-box-${idx}`}
-                className="w-48 h-[60px] px-5 bg-white border border-[#E5E7EB] dark:border-border-subtle rounded-xl flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(14,27,46,0.02)] hover:border-accent-primary/30 hover:scale-[1.04] hover:shadow-[0_4px_12px_rgba(14,27,46,0.04)] transition-all duration-300"
+                className="w-48 h-[60px] px-5 bg-white border border-black/10 dark:border-white/10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_var(--ui-shadow-color)] hover:border-accent-primary/30 hover:scale-[1.04] hover:shadow-[0_4px_12px_var(--ui-shadow-color)] transition-all duration-300"
               >
                 <img
                   src={sponsor.img}

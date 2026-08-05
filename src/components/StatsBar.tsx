@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useReveal } from '../hooks/useReveal';
 
 interface StatItem {
   target: number;
@@ -15,27 +16,10 @@ export const StatsBar: React.FC = () => {
     { target: 12, suffix: 'K', prefix: '$', label: 'HackAI Prize Pool' }
   ];
 
-  const [triggered, setTriggered] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [counts, setCounts] = useState<number[]>([0, 0, 0, 0]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting) {
-          setTriggered(true);
-        }
-      },
-      { threshold: 0.2 }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
+  // Shared reveal observer replaces this component's own; `isRevealed` both
+  // fades the band in and starts the count-up.
+  const { ref: containerRef, isRevealed: triggered } = useReveal();
 
   useEffect(() => {
     if (!triggered) return;
@@ -68,9 +52,14 @@ export const StatsBar: React.FC = () => {
   }, [triggered]);
 
   return (
+    // The whole band reveals as one unit. The stat cells must NOT be wrapped
+    // individually — `divide-y`/`divide-x` below draws separators between direct
+    // children, and an extra wrapper per cell would remove them.
     <div
       id="homepage-stats-band"
       ref={containerRef}
+      data-reveal=""
+      {...(triggered ? { 'data-revealed': '' } : {})}
       className="bg-bg-elevated border-y border-border-subtle shadow-card py-6 md:py-8 z-20 relative overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-6 md:px-16 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-border-subtle/50">

@@ -22,18 +22,12 @@ export const TextScramble: React.FC<TextScrambleProps> = ({
   intervalMs = 40,
 }) => {
   const [frame, setFrame] = useState<number>(-1);
-  const [triggerCount, setTriggerCount] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Compute total characters including spaces
   const totalLength = text.length;
   // Account for staggering and base lock cycles
   const maxFrame = (totalLength - 1) * stagger + lockCycles + 3;
-
-  const handleMouseEnter = () => {
-    // Re-trigger the glitching scramble logic on hover to make it highly interactive!
-    setTriggerCount(prev => prev + 1);
-  };
 
   useEffect(() => {
     // Clear any existing intervals and delays
@@ -44,7 +38,6 @@ export const TextScramble: React.FC<TextScrambleProps> = ({
     setFrame(-1);
 
     const runScramble = () => {
-      let currentFrame = 0;
       setFrame(0);
 
       timerRef.current = setInterval(() => {
@@ -69,7 +62,7 @@ export const TextScramble: React.FC<TextScrambleProps> = ({
       if (timerRef.current) clearInterval(timerRef.current);
       if (startDelayTimer) clearTimeout(startDelayTimer);
     };
-  }, [triggerCount, text, delay, stagger, lockCycles, intervalMs, maxFrame]);
+  }, [text, delay, stagger, lockCycles, intervalMs, maxFrame]);
 
   // Break text into words to prevent individual characters from breaking across lines
   let globalCharIndex = 0;
@@ -99,7 +92,7 @@ export const TextScramble: React.FC<TextScrambleProps> = ({
         contentChar = GLITCH_CHARS[charSeed];
         spanClass = 'font-mono font-bold text-accent-secondary brightness-125 transition-transform duration-75';
         // Cyber glow shader effect mirroring the website colors
-        style.textShadow = '0 0 8px rgba(0, 172, 120, 0.45), 0 0 15px rgba(59, 91, 255, 0.2)';
+        style.textShadow = '0 0 8px var(--ui-accent-secondary-dim), 0 0 15px var(--ui-accent-primary-dim)';
       } else {
         // 3. Locked Decoded State
         contentChar = originalChar;
@@ -143,11 +136,12 @@ export const TextScramble: React.FC<TextScrambleProps> = ({
     );
   });
 
+  // Runs once on mount only. It used to re-trigger on hover, which meant page
+  // headings re-scrambled every time the pointer crossed them.
   return (
     <span
       id={id}
-      className={`inline font-mono select-none cursor-pointer ${className}`}
-      onMouseEnter={handleMouseEnter}
+      className={`inline font-mono select-none ${className}`}
     >
       {wordElements}
     </span>

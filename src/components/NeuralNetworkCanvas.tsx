@@ -1,10 +1,49 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
+import { subscribe } from '../theme';
+
+/**
+ * Reads a color token from the stylesheet so the scene stays in sync with the
+ * design system instead of carrying its own hex literals. Falls back to the
+ * dark-theme value if the variable is missing (e.g. during a hot reload).
+ */
+const readColor = (token: string, fallback: number): number => {
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue(token)
+    .trim();
+  if (!raw) return fallback;
+  try {
+    return new THREE.Color(raw).getHex();
+  } catch {
+    return fallback;
+  }
+};
+
+/**
+ * Scene palette. The four node layers walk the brand ramp
+ * blue → blue → purple → green; the rim lights pick up primary and tertiary.
+ * `-on-inverse` variants are used for the node bodies because the canvas is
+ * transparent over both a light and a dark page and needs the saturated end of
+ * the ramp to stay visible either way.
+ */
+const readScenePalette = () => ({
+  layers: [
+    readColor('--ui-accent-primary-on-inverse', 0x4f9ddb),
+    readColor('--ui-accent-primary', 0x4f9ddb),
+    readColor('--ui-accent-tertiary', 0x8b4fdb),
+    readColor('--ui-accent-secondary-on-inverse', 0x4fdb8b),
+  ],
+  rimLight: readColor('--ui-accent-primary-on-inverse', 0x4f9ddb),
+  fillLight: readColor('--ui-accent-tertiary', 0x8b4fdb),
+  edge: readColor('--ui-text-muted', 0x7c8695),
+});
 
 export const NeuralNetworkCanvas: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Always-empty host that React owns but never renders children into, so the
+  // imperatively appended <canvas> can never collide with reconciliation.
+  const canvasHostRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
 
   // Animation values & interaction references
@@ -14,10 +53,21 @@ export const NeuralNetworkCanvas: React.FC = () => {
   const scrollRatioRef = useRef(1.0); // 1.0 means fully visible, 0.0 means out of view
 
   useEffect(() => {
-    if (!canvasRef.current || !containerRef.current) return;
+    if (!containerRef.current || !canvasHostRef.current) return;
 
-    const canvas = canvasRef.current;
     const container = containerRef.current;
+
+    // The canvas is created here rather than in JSX so that each run of this
+    // effect owns its own element. Cleanup calls renderer.forceContextLoss(),
+    // which permanently kills a canvas's WebGL context — on a JSX-owned canvas
+    // the element survives StrictMode's mount/unmount/mount cycle in dev, and
+    // the second WebGLRenderer would be handed the dead context and throw,
+    // taking the whole React tree down with it and blanking the site.
+    const canvas = document.createElement('canvas');
+    canvas.id = 'neural-network-canvas-webgl';
+    canvas.className = 'w-full h-full block focus:outline-none';
+    canvas.style.pointerEvents = 'auto';
+    canvasHostRef.current.appendChild(canvas);
 
     // Dimensions
     let width = container.clientWidth;
@@ -48,13 +98,15 @@ export const NeuralNetworkCanvas: React.FC = () => {
     dirLight.position.set(5, 8, 6);
     scene.add(dirLight);
 
-    // Blue rim light to match the glass cube reference edge glow
-    const pointLightBlue = new THREE.PointLight(0x3B5BFF, 4, 15);
+    let palette = readScenePalette();
+
+    // Brand-blue rim light to match the glass cube reference edge glow
+    const pointLightBlue = new THREE.PointLight(palette.rimLight, 4, 15);
     pointLightBlue.position.set(-4, 3, -5);
     scene.add(pointLightBlue);
 
-    // Cyan fill underneath
-    const pointLightCyan = new THREE.PointLight(0x00C8FF, 2, 12);
+    // Purple fill underneath
+    const pointLightCyan = new THREE.PointLight(palette.fillLight, 2, 12);
     pointLightCyan.position.set(4, -3, 4);
     scene.add(pointLightCyan);
 
@@ -65,10 +117,10 @@ export const NeuralNetworkCanvas: React.FC = () => {
     // Nodes definition: 4 Layers forming a 3D Cube (each with a 3x3 = 9 node grid)
     // Layer X bounds, count, color details
     const layersConfig = [
-      { id: 0, x: -1.8, nodesCount: 9, color: 0x00C8FF }, // Layer 0 (Cyan)
-      { id: 1, x: -0.6, nodesCount: 9, color: 0x3B5BFF }, // Layer 1 (Electric Blue)
-      { id: 2, x: 0.6, nodesCount: 9, color: 0x5C7CFA },  // Layer 2 (Periwinkle Blue)
-      { id: 3, x: 1.8, nodesCount: 9, color: 0x00A878 }   // Layer 3 (Teal)
+      { id: 0, x: -1.8, nodesCount: 9, color: palette.layers[0] }, // Brand blue
+      { id: 1, x: -0.6, nodesCount: 9, color: palette.layers[1] }, // Brand blue (themed)
+      { id: 2, x: 0.6, nodesCount: 9, color: palette.layers[2] },  // Brand purple
+      { id: 3, x: 1.8, nodesCount: 9, color: palette.layers[3] }   // Brand green
     ];
 
     const nodesData: Array<{
@@ -131,7 +183,7 @@ export const NeuralNetworkCanvas: React.FC = () => {
 
     // Create Edges/Connections
     const edgeMaterial = new THREE.LineBasicMaterial({
-      color: 0x93B4E8,
+      color: palette.edge,
       opacity: 0.35,
       transparent: true
     });
@@ -235,6 +287,12 @@ export const NeuralNetworkCanvas: React.FC = () => {
         });
       });
     };
+
+    // Ambient idle rotation: yaw only, so it reads as a turntable rather than a
+    // tumble. ~0.048 rad/s — a full revolution takes a bit over two minutes.
+    // Suppressed entirely for visitors who ask for reduced motion.
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const AMBIENT_SPIN_PER_FRAME = prefersReducedMotion ? 0 : 0.0012;
 
     // Let's create drag state and listeners to support grabbing and manual rotation with inertia
     const dragRotation = { x: 0.45, y: 0.7, z: 0.35 };
@@ -340,6 +398,29 @@ export const NeuralNetworkCanvas: React.FC = () => {
       }
     };
 
+    // Repaint the existing materials when the theme flips. Deliberately NOT a
+    // dependency of this effect: re-running it would tear down and rebuild the
+    // whole WebGL scene on every toggle.
+    const unsubscribeTheme = subscribe(() => {
+      palette = readScenePalette();
+
+      pointLightBlue.color.setHex(palette.rimLight);
+      pointLightCyan.color.setHex(palette.fillLight);
+      edgeMaterial.color.setHex(palette.edge);
+
+      nodesData.forEach((node) => {
+        const nextColor = palette.layers[node.layerId] ?? node.baseColor;
+        // baseColor must be updated too — the hover reset and the beam cascade
+        // both restore from it, so a stale value repaints in the old palette.
+        node.baseColor = nextColor;
+        // Skip the hovered node: it is currently white by design and will pick
+        // up the new baseColor when the pointer leaves.
+        if (currentlyHoveredNode?.mesh !== node.mesh) {
+          (node.mesh.material as THREE.MeshPhysicalMaterial).color.setHex(nextColor);
+        }
+      });
+    });
+
     // Setup IntersectionObserver to throttle animation when out of view
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -393,7 +474,10 @@ export const NeuralNetworkCanvas: React.FC = () => {
 
       const delta = clock.getDelta();
       const elapsedTime = clock.getElapsedTime();
-      const relativeTimeSpeed = delta / (1 / 60) || 1.0;
+      // The loop bails out early while off-screen without reading the clock, so the
+      // first delta after it comes back can be seconds long. Cap it, otherwise the
+      // lerps below overshoot and the whole scene visibly snaps.
+      const relativeTimeSpeed = Math.min(delta / (1 / 60) || 1.0, 3.0);
 
       // Detect device category for styling and scaling responsiveness
       const isMobile = width < 768;
@@ -437,6 +521,11 @@ export const NeuralNetworkCanvas: React.FC = () => {
         // Clamp to absolute zero below threshold
         if (Math.abs(velocityY) < 0.0001) velocityY = 0;
         if (Math.abs(velocityX) < 0.0001) velocityX = 0;
+
+        // Ambient turntable drift. Folded into dragRotation rather than applied
+        // separately so it composes with momentum and continues from wherever
+        // the user last left the object, instead of fighting their drag.
+        dragRotation.y += AMBIENT_SPIN_PER_FRAME * relativeTimeSpeed;
       }
 
       // Responsive mouse rotation tilt with manual drag rotation incorporated seamlessly
@@ -539,6 +628,7 @@ export const NeuralNetworkCanvas: React.FC = () => {
       cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
       observer.disconnect();
+      unsubscribeTheme();
       scaleTween.kill();
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('smoothscroll', handleScroll);
@@ -548,8 +638,37 @@ export const NeuralNetworkCanvas: React.FC = () => {
       container.removeEventListener('pointercancel', handlePointerUp);
       container.removeEventListener('mouseenter', handlePointerEnter);
       container.removeEventListener('mouseleave', handlePointerLeave);
-      renderer.dispose();
+
+      // Stop every in-flight tween first: the beam tweens hold onComplete callbacks
+      // that re-add meshes to a scene we are about to tear down.
+      gsap.killTweensOf(nodesData.map(n => n.mesh.scale));
+      networkGroup.traverse((obj) => {
+        gsap.killTweensOf(obj.position);
+        gsap.killTweensOf(obj.scale);
+      });
+
+      // The component remounts on every navigation back to Home, so GPU-side
+      // buffers must be released explicitly or each visit leaks a WebGL context.
+      networkGroup.traverse((obj) => {
+        const mesh = obj as THREE.Mesh | THREE.Line;
+        if ((mesh as THREE.Mesh).isMesh || (mesh as THREE.Line).isLine) {
+          mesh.geometry?.dispose();
+          const material = mesh.material;
+          if (Array.isArray(material)) {
+            material.forEach((m) => m.dispose());
+          } else {
+            material?.dispose();
+          }
+        }
+      });
+      sphereGeometry.dispose();
+      edgeMaterial.dispose();
+
       scene.clear();
+      renderer.dispose();
+      renderer.forceContextLoss();
+      // Safe because this canvas belongs to this effect run and is discarded here.
+      canvas.remove();
     };
   }, []);
 
@@ -562,7 +681,7 @@ export const NeuralNetworkCanvas: React.FC = () => {
       {/* Background soft ambient halo blur disc inside right column container */}
       <div 
         id="network-glow-disc" 
-        className="absolute w-[70%] h-[70%] rounded-full opacity-60 z-0 bg-[radial-gradient(circle,rgba(59,91,255,0.14)_0%,transparent_70%)] pointer-events-none"
+        className="absolute w-[70%] h-[70%] rounded-full opacity-60 z-0 bg-[radial-gradient(circle,var(--ui-accent-primary-dim)_0%,transparent_70%)] pointer-events-none"
       />
       
       {loading && (
@@ -572,12 +691,8 @@ export const NeuralNetworkCanvas: React.FC = () => {
         </div>
       )}
 
-      <canvas
-        id="neural-network-canvas-webgl"
-        ref={canvasRef}
-        className="relative z-10 w-full h-full block focus:outline-none"
-        style={{ pointerEvents: 'auto' }}
-      />
+      {/* The effect appends its <canvas> in here; React keeps this node empty. */}
+      <div ref={canvasHostRef} className="relative z-10 w-full h-full" />
     </div>
   );
 };
