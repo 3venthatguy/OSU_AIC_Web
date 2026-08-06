@@ -9,14 +9,16 @@ import { AboutGallery } from '../components/AboutGallery';
 import { FAQ } from '../components/FAQ';
 import { TextScramble } from '../components/TextScramble';
 import { Reveal } from '../components/Reveal';
-import { useRevealProps, staggerDelay } from '../hooks/useReveal';
+import { useRevealProps, useRevealSequenceProps, sequenceDelay, staggerDelay } from '../hooks/useReveal';
 
 interface AboutProps {
   onNavigate?: (page: string) => void;
 }
 
 export const About: React.FC<AboutProps> = ({ onNavigate }) => {
-  const heroReveal = useRevealProps();
+  // Sequenced, not all-at-once: the hero's eyebrow, heading, copy and buttons
+  // each get their own slot. See `useRevealSequenceProps`.
+  const heroReveal = useRevealSequenceProps();
   const officersHeaderReveal = useRevealProps();
   const [expandedOfficer, setExpandedOfficer] = useState<Officer | null>(null);
   const [animState, setAnimState] = useState<'idle' | 'starting' | 'active' | 'closing'>('idle');
@@ -333,7 +335,7 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
             Our Story & Vision
           </span>
           <h1 className="font-display text-[44px] md:text-[64px] font-extrabold text-text-primary leading-none tracking-tight mb-6">
-            <TextScramble id="about-title-scramble" text="About Us" />
+            <TextScramble id="about-title-scramble" text="About Us" delay={sequenceDelay(1)} />
           </h1>
           <p className="font-sans text-[16px] md:text-[18px] text-text-secondary leading-relaxed max-w-2xl">
             We are a community of students and researchers passionate about bringing people together to collaborate on algorithmic theory, real-world deployment, and safety in Artificial Intelligence.

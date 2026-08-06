@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Calendar, MapPin, Trophy, Sparkles, BrainCircuit, Users, Terminal, Code2, Play } from 'lucide-react';
 import { TextScramble } from '../components/TextScramble';
 import { Reveal } from '../components/Reveal';
-import { useRevealProps, staggerDelay } from '../hooks/useReveal';
+import { useRevealProps, useRevealSequenceProps, sequenceDelay, staggerDelay } from '../hooks/useReveal';
 import {
   HACKAI_NAME,
   HACKAI_DATE_FULL,
@@ -13,7 +13,9 @@ import {
 } from '../data';
 
 export const HackAI: React.FC = () => {
-  const heroReveal = useRevealProps();
+  // Sequenced, not all-at-once: the hero's eyebrow, heading, copy and buttons
+  // each get their own slot. See `useRevealSequenceProps`.
+  const heroReveal = useRevealSequenceProps();
   const prizesHeaderReveal = useRevealProps();
   const scheduleHeaderReveal = useRevealProps();
   const faqHeaderReveal = useRevealProps();
@@ -54,7 +56,7 @@ export const HackAI: React.FC = () => {
           </span>
 
           <h1 className="font-display text-[44px] md:text-[76px] font-extrabold text-text-primary leading-none tracking-tighter mb-6">
-            <TextScramble id="hackai-title-scramble" text={HACKAI_NAME} />
+            <TextScramble id="hackai-title-scramble" text={HACKAI_NAME} delay={sequenceDelay(1)} />
           </h1>
           
           <p className="font-sans text-[16px] md:text-[18px] text-text-secondary leading-relaxed max-w-2xl mb-10 text-center">

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { TextScramble } from '../components/TextScramble';
 import { Reveal } from '../components/Reveal';
-import { useRevealProps, staggerDelay } from '../hooks/useReveal';
+import { useRevealProps, useRevealSequenceProps, sequenceDelay, staggerDelay } from '../hooks/useReveal';
 import {
   MEETING_DAY,
   MEETING_TIME,
@@ -30,7 +30,9 @@ interface GetInvolvedProps {
 }
 
 export const GetInvolved: React.FC<GetInvolvedProps> = ({ onNavigate }) => {
-  const heroReveal = useRevealProps();
+  // Sequenced, not all-at-once: the hero's eyebrow, heading, copy and buttons
+  // each get their own slot. See `useRevealSequenceProps`.
+  const heroReveal = useRevealSequenceProps();
   const applyStripReveal = useRevealProps();
   const contactHeaderReveal = useRevealProps();
   const inPersonReveal = useRevealProps();
@@ -53,7 +55,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({ onNavigate }) => {
             Everyone Is Welcome
           </span>
           <h1 className="font-display text-[44px] md:text-[64px] font-extrabold text-text-primary leading-none tracking-tight mb-6">
-            <TextScramble id="get-involved-title-scramble" text="Get Involved" />
+            <TextScramble id="get-involved-title-scramble" text="Get Involved" delay={sequenceDelay(1)} />
           </h1>
           <p className="font-sans text-[16px] md:text-[18px] text-text-secondary leading-relaxed max-w-2xl">
             There is no application and no membership fee. Whether you have never written a line of

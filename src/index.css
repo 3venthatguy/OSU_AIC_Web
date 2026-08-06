@@ -377,24 +377,57 @@
 }
 
 /* Scroll-triggered reveals — see src/hooks/useReveal.ts.
-   The hidden state lives INSIDE `no-preference` so that under
+
+   THE FOUR KNOBS. Both the single-element form (`[data-reveal]`) and the
+   sequenced form (`[data-reveal-sequence]`) read these, so tuning here changes
+   every reveal on the site at once. */
+:root {
+  --reveal-duration: 1100ms;
+  --reveal-ease: cubic-bezier(0.25, 1, 0.5, 1);
+  /* How far the element travels up into place. Scale this with duration — a
+     long fade over a short distance reads as hanging rather than slow. */
+  --reveal-shift: 28px;
+  /* Gap between consecutive children of a sequenced container. */
+  --reveal-step: 130ms;
+}
+
+/* The hidden state lives INSIDE `no-preference` so that under
    `prefers-reduced-motion: reduce` nothing is ever hidden in the first place;
    the accessible path then needs no JS to rescue it. */
 @media (prefers-reduced-motion: no-preference) {
-  [data-reveal] {
+  [data-reveal],
+  [data-reveal-sequence] > * {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(var(--reveal-shift));
     transition:
-      opacity 620ms cubic-bezier(0.25, 1, 0.5, 1),
-      transform 620ms cubic-bezier(0.25, 1, 0.5, 1);
+      opacity var(--reveal-duration) var(--reveal-ease),
+      transform var(--reveal-duration) var(--reveal-ease);
   }
+
+  /* Sequenced containers stagger their DIRECT children, so a hero's eyebrow,
+     heading, body copy and button row arrive one after another instead of as
+     one block. The container itself never animates — only its children — which
+     is why it carries no `data-reveal`.
+
+     Slots are positional, so reordering the JSX reorders the sequence. Past the
+     8th child the delay stops growing: heroes never run that deep, and a
+     runaway tail would leave content stranded for seconds. */
+  [data-reveal-sequence] > *:nth-child(1) { transition-delay: calc(var(--reveal-offset, 0ms) + 0 * var(--reveal-step)); }
+  [data-reveal-sequence] > *:nth-child(2) { transition-delay: calc(var(--reveal-offset, 0ms) + 1 * var(--reveal-step)); }
+  [data-reveal-sequence] > *:nth-child(3) { transition-delay: calc(var(--reveal-offset, 0ms) + 2 * var(--reveal-step)); }
+  [data-reveal-sequence] > *:nth-child(4) { transition-delay: calc(var(--reveal-offset, 0ms) + 3 * var(--reveal-step)); }
+  [data-reveal-sequence] > *:nth-child(5) { transition-delay: calc(var(--reveal-offset, 0ms) + 4 * var(--reveal-step)); }
+  [data-reveal-sequence] > *:nth-child(6) { transition-delay: calc(var(--reveal-offset, 0ms) + 5 * var(--reveal-step)); }
+  [data-reveal-sequence] > *:nth-child(7) { transition-delay: calc(var(--reveal-offset, 0ms) + 6 * var(--reveal-step)); }
+  [data-reveal-sequence] > *:nth-child(n + 8) { transition-delay: calc(var(--reveal-offset, 0ms) + 7 * var(--reveal-step)); }
 }
 
 /* `transform: none`, deliberately not `translateY(0)`: a lingering transform
    makes the element a containing block, which offsets getBoundingClientRect()
    for the officer/project flip-card measurement and re-anchors any
    position:fixed descendant. */
-[data-reveal][data-revealed] {
+[data-reveal][data-revealed],
+[data-reveal-sequence][data-revealed] > * {
   opacity: 1;
   transform: none;
 }

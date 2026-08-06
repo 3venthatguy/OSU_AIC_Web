@@ -79,18 +79,18 @@ export const TextScramble: React.FC<TextScrambleProps> = ({
 
       let contentChar: string;
       let spanClass = '';
-      let style: React.CSSProperties = { display: 'inline-block' };
+      const style: React.CSSProperties = {};
 
       if (frame < startFrame) {
         // 1. Initial State: hidden / blank spacing
-        contentChar = '\u00A0';
-        spanClass = 'text-transparent select-none opacity-0';
+        contentChar = '';
+        spanClass = 'opacity-0';
       } else if (frame >= startFrame && frame < lockFrame) {
         // 2. Glitching Scramble State
         // Pick a fast-updating, frame-dependent random character
         const charSeed = (frame + idx) % GLITCH_CHARS.length;
         contentChar = GLITCH_CHARS[charSeed];
-        spanClass = 'font-mono font-bold text-accent-secondary brightness-125 transition-transform duration-75';
+        spanClass = 'font-bold text-accent-secondary brightness-125 transition-transform duration-75';
         // Cyber glow shader effect mirroring the website colors
         style.textShadow = '0 0 8px var(--ui-accent-secondary-dim), 0 0 15px var(--ui-accent-primary-dim)';
       } else {
@@ -99,14 +99,27 @@ export const TextScramble: React.FC<TextScrambleProps> = ({
         spanClass = 'text-text-primary transition-colors duration-300';
       }
 
+      // Each slot is sized by an invisible copy of the FINAL character, with the
+      // current frame's character painted over it. `font-mono` is Roboto here
+      // like everything else (see index.css), so a `%` or `@` is materially
+      // wider than the letter it stands in for \u2014 measuring the live character
+      // would make the heading's width, and therefore its line count, change on
+      // every frame and shove the rest of the hero around mid-animation.
       return (
         <span
           key={idx}
           id={`${id}-character-${idx}`}
-          className={`font-mono ${spanClass}`}
-          style={style}
+          className="relative inline-block text-center align-baseline"
         >
-          {contentChar}
+          <span aria-hidden="true" className="invisible">
+            {originalChar}
+          </span>
+          <span
+            className={`absolute inset-0 font-mono ${spanClass}`}
+            style={style}
+          >
+            {contentChar}
+          </span>
         </span>
       );
     });

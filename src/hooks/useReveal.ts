@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * Scroll-triggered reveal.
@@ -13,11 +13,37 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * viewport space — the same reason the existing StatsBar counter fires.
  */
 
+/**
+ * How far the viewport must be *through* an element before it reveals.
+ * 0.5 = half the element has entered the screen. Lower it (0.25) for earlier
+ * reveals, raise it (0.75) for later ones.
+ */
+const REVEAL_RATIO = 0.5;
+
 const REVEAL_OPTIONS: IntersectionObserverInit = {
-  // Commit just after the element enters, rather than exactly at the edge.
-  rootMargin: '0px 0px -8% 0px',
-  threshold: 0,
+  // No negative margin: the ratio below is what decides when to commit.
+  rootMargin: '0px',
+  // The observer only calls back when a listed threshold is crossed, so include
+  // low ones — an element taller than the viewport can never reach REVEAL_RATIO
+  // and is resolved by the midpoint check in `hasPassedHalfway` instead.
+  threshold: [0, 0.1, 0.25, REVEAL_RATIO],
 };
+
+/**
+ * True once the viewport is halfway through the element.
+ *
+ * Two cases, because ratio alone doesn't cover both:
+ *  - Element shorter than the viewport: it can reach REVEAL_RATIO visibility.
+ *  - Element taller than the viewport: max ratio is viewportHeight/elementHeight,
+ *    which may be under REVEAL_RATIO forever, so fall back to asking whether the
+ *    element's top has crossed the vertical middle of the screen.
+ */
+function hasPassedHalfway(entry: IntersectionObserverEntry): boolean {
+  if (entry.intersectionRatio >= REVEAL_RATIO) return true;
+  const root = entry.rootBounds;
+  if (!root) return false;
+  return entry.boundingClientRect.top <= root.top + root.height * REVEAL_RATIO;
+}
 
 /** Elements start at opacity 0, so any failure to observe must fail *open*. */
 const supportsObserver =
@@ -37,7 +63,7 @@ function getObserver(): IntersectionObserver | null {
   if (!observer) {
     observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
+        if (!entry.isIntersecting || !hasPassedHalfway(entry)) return;
         const fire = callbacks.get(entry.target);
         // Unobserve before firing: reveals are once-only, and dropping the entry
         // here keeps the shared map bounded as pages mount and unmount.
@@ -117,4 +143,41 @@ export function useRevealProps(delay = 0) {
 /** Stagger helper: caps the delay so long grids don't trail badly. */
 export function staggerDelay(index: number, step = 60, max = 8) {
   return Math.min(index, max) * step;
+}
+
+/**
+ * Gap between consecutive children of a sequenced container, in ms. Mirrors
+ * `--reveal-step` in index.css, which is what actually drives the CSS — this
+ * copy exists so JS-timed animations inside a slot (the `TextScramble` glitch)
+ * can be told to start when their slot arrives. Keep the two in sync.
+ */
+export const REVEAL_STEP = 130;
+
+/** Delay of the nth slot of a sequenced container (0-indexed), in ms. */
+export function sequenceDelay(slot: number) {
+  return Math.min(slot, 7) * REVEAL_STEP;
+}
+
+/**
+ * Props for a container whose DIRECT children should fade in one after another
+ * rather than all at once — page heroes, mainly, where the eyebrow, heading,
+ * body copy and buttons otherwise land simultaneously.
+ *
+ * The container itself does not animate; it only carries the observed ref and
+ * the revealed flag. Ordering is positional (`nth-child` in index.css), so
+ * reordering the JSX reorders the sequence, and every child must be an element
+ * — a bare text node gets no slot.
+ *
+ * @param offset ms to hold the whole sequence back before its first slot.
+ */
+export function useRevealSequenceProps(offset = 0) {
+  const { ref, isRevealed } = useReveal();
+  return {
+    ref,
+    'data-reveal-sequence': '',
+    ...(isRevealed ? { 'data-revealed': '' } : {}),
+    ...(offset
+      ? { style: { '--reveal-offset': `${offset}ms` } as React.CSSProperties }
+      : {}),
+  } as const;
 }

@@ -4,7 +4,7 @@ import { ClubEvent } from '../types';
 import { Calendar, MapPin, Clock, ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
 import { TextScramble } from '../components/TextScramble';
 import { Reveal } from '../components/Reveal';
-import { useRevealProps, staggerDelay } from '../hooks/useReveal';
+import { useRevealProps, useRevealSequenceProps, sequenceDelay, staggerDelay } from '../hooks/useReveal';
 import {
   MEETING_LOCATION,
   MEETING_DAY,
@@ -12,7 +12,9 @@ import {
 } from '../data';
 
 export const Events: React.FC = () => {
-  const heroReveal = useRevealProps();
+  // Sequenced, not all-at-once: the hero's eyebrow, heading, copy and buttons
+  // each get their own slot. See `useRevealSequenceProps`.
+  const heroReveal = useRevealSequenceProps();
   const upcomingHeaderReveal = useRevealProps();
   const pastHeaderReveal = useRevealProps();
   const [activeFilter, setActiveFilter] = useState<string>('All');
@@ -69,7 +71,7 @@ export const Events: React.FC = () => {
             Get Involved
           </span>
           <h1 className="font-display text-[44px] md:text-[64px] font-extrabold text-text-primary leading-none tracking-tight mb-5 animate-fade-in">
-            <TextScramble id="events-title-scramble" text="Club Events" />
+            <TextScramble id="events-title-scramble" text="Club Events" delay={sequenceDelay(1)} />
           </h1>
           <p className="font-sans text-[15px] md:text-[17px] text-text-secondary leading-relaxed max-w-xl mb-8">
             Workshops, speaker sessions, regional hackathons, and social mixers — explore our academic calendar and rsvp below.

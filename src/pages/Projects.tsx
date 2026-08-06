@@ -26,10 +26,12 @@ import { PROJECTS, MEETING_LOCATION, MEETING_DAY, MEETING_TIME, CLUB_EMAIL, PROJ
 import { ProjectItem } from '../types';
 import { TextScramble } from '../components/TextScramble';
 import { Reveal } from '../components/Reveal';
-import { useRevealProps, staggerDelay } from '../hooks/useReveal';
+import { useRevealProps, useRevealSequenceProps, sequenceDelay, staggerDelay } from '../hooks/useReveal';
 
 export const Projects: React.FC = () => {
-  const heroReveal = useRevealProps();
+  // Sequenced, not all-at-once: the hero's eyebrow, heading, copy and buttons
+  // each get their own slot. See `useRevealSequenceProps`.
+  const heroReveal = useRevealSequenceProps();
   const heroStatsReveal = useRevealProps(120);
   // In-place props: the sidebar and the results column are `lg:col-span-*`
   // children of the section grid and must stay direct children of it.
@@ -477,7 +479,7 @@ export const Projects: React.FC = () => {
               Student-Led Innovation
             </span>
             <h1 className="font-display text-[38px] md:text-[54px] font-extrabold text-text-primary tracking-tight leading-[1.1]">
-              <TextScramble id="projects-title-scramble" text="The Projects Incubator" />
+              <TextScramble id="projects-title-scramble" text="The Projects Incubator" delay={sequenceDelay(1)} />
             </h1>
             <p className="font-sans text-[16px] md:text-[18px] text-text-secondary leading-relaxed mt-4 max-w-2xl mx-auto">
               Each semester, our members form multidisciplinary sprint teams to construct open-source AI software. From state-of-the-art computer vision tools to autonomous reinforcement learning models, we build real products.

@@ -8,15 +8,17 @@ import { HackAITeaser } from '../components/HackAITeaser';
 import { TextScramble } from '../components/TextScramble';
 import { MEETING_DAY, MEETING_TIME, MEETING_LOCATION } from '../data';
 import { Clock } from 'lucide-react';
-import { useRevealProps } from '../hooks/useReveal';
+import { useRevealSequenceProps, sequenceDelay } from '../hooks/useReveal';
 
 interface HomeProps {
   onNavigate: (page: string) => void;
 }
 
 export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
-  const heroReveal = useRevealProps();
-  const mobileHeroReveal = useRevealProps();
+  // Sequenced, not all-at-once: the hero's eyebrow, heading, copy and buttons
+  // each get their own slot. See `useRevealSequenceProps`.
+  const heroReveal = useRevealSequenceProps();
+  const mobileHeroReveal = useRevealSequenceProps();
 
   return (
     <div id="homepage-root">
@@ -57,10 +59,16 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
               id="hero-heading"
               /* Only the lg+ steps ever render — this block is `hidden lg:block`.
                  72px was the single size for everything above 1024px, which is
-                 what crowded the canvas on smaller laptops. */
-              className="font-display text-[42px] lg:text-[52px] xl:text-[62px] 2xl:text-[72px] font-extrabold text-text-primary leading-[1.08] tracking-tight mb-6"
+                 what crowded the canvas on smaller laptops.
+
+                 `min-h-[2.16em]` reserves exactly two lines (2 x the 1.08
+                 line-height) at every breakpoint, since `em` tracks the heading's
+                 own font-size. The title wraps to two lines once decoded, so
+                 without the floor the entire hero column — copy, meeting line,
+                 buttons — shifts down as the scramble resolves. */
+              className="font-display text-[42px] lg:text-[52px] xl:text-[62px] 2xl:text-[72px] font-extrabold text-text-primary leading-[1.08] tracking-tight mb-6 lg:min-h-[2.16em]"
             >
-              <TextScramble id="hero-title-scramble-1" text="Artificial Intelligence Club" className="block text-text-primary" />
+              <TextScramble id="hero-title-scramble-1" text="Artificial Intelligence Club" delay={sequenceDelay(1)} className="block text-text-primary" />
             </h1>
 
             {/* Subtext description */}
@@ -137,8 +145,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
 
             {/* Title stacked */}
             <h1 className="font-display text-[38px] md:text-[56px] font-extrabold text-text-primary leading-[1.12] tracking-tight mb-5">
-              <TextScramble id="hero-mobile-title-scramble-1" text="Artificial Intelligence" className="block text-text-primary" />
-              <TextScramble id="hero-mobile-title-scramble-2" text="Club at Ohio State" delay={500} className="block text-text-primary mt-1" />
+              <TextScramble id="hero-mobile-title-scramble-1" text="Artificial Intelligence" delay={sequenceDelay(1)} className="block text-text-primary" />
+              <TextScramble id="hero-mobile-title-scramble-2" text="Club at Ohio State" delay={sequenceDelay(1) + 500} className="block text-text-primary mt-1" />
             </h1>
 
             {/* Subtext description */}
