@@ -5,6 +5,7 @@ import { OFFICERS } from '../data';
 import { Officer } from '../types';
 import { Linkedin, Github, Twitter, Globe, X, Sparkles, Trophy, Award } from 'lucide-react';
 import { AboutSection } from '../components/AboutSection';
+import { AboutGallery } from '../components/AboutGallery';
 import { FAQ } from '../components/FAQ';
 import { TextScramble } from '../components/TextScramble';
 import { Reveal } from '../components/Reveal';
@@ -318,12 +319,15 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
     <div id="about-page-root" className="pt-[72px] bg-bg-primary min-h-screen">
       
       {/* 1. ABOUT HERO */}
+      {/* `flex-col`, not the previous `items-center justify-center`: those centre
+          a single child, and the heading / gallery / description now stack.
+          `overflow-hidden` stays — it is what clips the gallery's tilt. */}
       <section
         id="about-hero-header"
-        className="py-20 md:py-28 relative overflow-hidden flex items-center justify-center text-center border-b border-border-subtle"
+        className="py-20 md:py-28 relative overflow-hidden flex flex-col items-center text-center border-b border-border-subtle"
       >
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,var(--ui-accent-secondary-dim)_0%,transparent_50%)] pointer-events-none" />
-        
+
         <div className="max-w-3xl mx-auto px-6 relative z-10 flex flex-col items-center" {...heroReveal}>
           <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.25em] block mb-4">
             Our Story & Vision
@@ -334,6 +338,15 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
           <p className="font-sans text-[16px] md:text-[18px] text-text-secondary leading-relaxed max-w-2xl">
             We are a community of students and researchers passionate about bringing people together to collaborate on algorithmic theory, real-world deployment, and safety in Artificial Intelligence.
           </p>
+        </div>
+
+        {/* Deliberately outside any `data-reveal` element: the reveal's unlayered
+            transform rules outrank Tailwind and leave a lingering transform,
+            which would fight the row's per-frame translate3d. The spacing lives
+            here rather than in the component so the gallery does not dictate its
+            own outer margins. */}
+        <div className="w-full relative z-10 mt-12 md:mt-16">
+          <AboutGallery />
         </div>
       </section>
 
@@ -374,90 +387,57 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
                     cardsRef.current[off.id] = el as HTMLDivElement;
                   }}
                   id={`officer-card-shell-${off.id}`}
-                  className="w-[300px] h-[380px] relative flex items-center justify-center select-none"
                   onClick={() => handleCardClick(off, off.id)}
+                  /* Flat single element, mirroring the project card in
+                     Projects.tsx. The perspective / preserve-3d / backface
+                     wrappers this replaces were inert: the grid card was pinned
+                     at rotateY(0deg) and had no back face, so it never flipped.
+                     Worse, `card-front`'s overflow:hidden sat on a box exactly
+                     the size of its child, so it clipped away the child's entire
+                     drop shadow. The shadow now lives on the clipping element
+                     itself, where overflow cannot eat it. */
+                  className="group w-[300px] h-[380px] bg-bg-elevated rounded-2xl overflow-hidden border border-border-subtle hover:border-accent-primary/20 shadow-card hover:shadow-card-hover transition-all duration-350 hover:-translate-y-1.5 flex flex-col justify-between cursor-pointer select-none"
                 >
-                  <div
-                    className="card-container"
-                    id={`officer-card-container-${off.id}`}
-                    style={{
-                      position: 'relative',
-                      width: '300px',
-                      height: '380px',
-                      perspective: '1000px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <div
-                      className="card-inner"
-                      style={{
-                        position: 'relative',
-                        width: '100%',
-                        height: '100%',
-                        transformStyle: 'preserve-3d',
-                        transition: 'transform 600ms cubic-bezier(0.4, 0, 0.2, 1)',
-                        transform: 'rotateY(0deg)',
-                      }}
-                    >
-                      {/* FRONT FACE */}
-                      <div
-                        className="card-front"
-                        style={{
-                          position: 'absolute',
-                          width: '100%',
-                          height: '100%',
-                          backfaceVisibility: 'hidden',
-                          WebkitBackfaceVisibility: 'hidden',
-                          top: 0,
-                          left: 0,
-                          overflow: 'hidden',
-                        }}
-                      >
-                        <div className="w-full h-full rounded-2xl bg-bg-elevated border border-border-subtle hover:border-accent-primary/25 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between overflow-hidden">
-                          {/* Image at Top */}
-                          <div className="w-full h-[280px] overflow-hidden relative border-b border-border-subtle/50 bg-bg-secondary flex items-center justify-center shrink-0">
-                            {off.photo ? (
-                              <img
-                                src={off.photo}
-                                alt={off.name}
-                                referrerPolicy="no-referrer"
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-bg-secondary text-accent-primary font-display font-black text-2xl">
-                                {off.initials}
-                              </div>
-                            )}
-                            {/* Academic Year Badge */}
-                            <div className="absolute top-2.5 right-2.5 px-2 py-0.5 bg-overlay backdrop-blur-md rounded-full text-[8px] font-bold text-accent-secondary tracking-widest uppercase border border-border-subtle/10">
-                              {off.year}
-                            </div>
-                          </div>
-
-                          {/* Content immediately below */}
-                          <div className="p-3 text-left flex-grow flex flex-col justify-between">
-                            <div>
-                              <h3 className="font-sans text-[15px] font-bold text-text-primary leading-tight">
-                                {off.name}
-                              </h3>
-                              <p className="font-sans text-[10px] font-bold uppercase tracking-wider text-accent-secondary mt-0.5">
-                                {off.role}
-                              </p>
-                            </div>
-                            
-                            <div className="border-t border-border-subtle/30 pt-1.5 flex flex-col gap-0.5">
-                              <p className="font-sans text-[10px] text-text-secondary line-clamp-1">
-                                <span className="font-bold text-text-primary">Major: </span>{off.major}
-                              </p>
-                              {off.minor && (
-                                <p className="font-sans text-[10px] text-text-secondary line-clamp-1">
-                                  <span className="font-bold text-text-primary">Minor: </span>{off.minor}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+                  {/* Image at Top */}
+                  <div className="w-full h-[280px] overflow-hidden relative border-b border-border-subtle/50 bg-bg-secondary flex items-center justify-center shrink-0">
+                    {off.photo ? (
+                      <img
+                        src={off.photo}
+                        alt={off.name}
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-bg-secondary text-accent-primary font-display font-black text-2xl group-hover:scale-[1.03] transition-transform duration-500">
+                        {off.initials}
                       </div>
+                    )}
+                    {/* Academic Year Badge */}
+                    <div className="absolute top-2.5 right-2.5 px-2 py-0.5 bg-overlay backdrop-blur-md rounded-full text-[8px] font-bold text-accent-secondary tracking-widest uppercase border border-border-subtle/10">
+                      {off.year}
+                    </div>
+                  </div>
+
+                  {/* Content immediately below */}
+                  <div className="p-3 text-left flex-grow flex flex-col justify-between">
+                    <div>
+                      <h3 className="font-sans text-[15px] font-bold text-text-primary leading-tight group-hover:text-accent-primary transition-colors">
+                        {off.name}
+                      </h3>
+                      <p className="font-sans text-[10px] font-bold uppercase tracking-wider text-accent-secondary mt-0.5">
+                        {off.role}
+                      </p>
+                    </div>
+
+                    <div className="border-t border-border-subtle/30 pt-1.5 flex flex-col gap-0.5">
+                      <p className="font-sans text-[10px] text-text-secondary line-clamp-1">
+                        <span className="font-bold text-text-primary">Major: </span>{off.major}
+                      </p>
+                      {off.minor && (
+                        <p className="font-sans text-[10px] text-text-secondary line-clamp-1">
+                          <span className="font-bold text-text-primary">Minor: </span>{off.minor}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

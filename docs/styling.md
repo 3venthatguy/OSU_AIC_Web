@@ -115,6 +115,33 @@ Effects are variables rather than tokens because they go inside arbitrary values
 
 Written as `shadow-[0_4px_14px_var(--ui-accent-glow)]`.
 
+## Typography
+
+The site is single-typeface: **Roboto**, pulled from Google Fonts by the `@import` on line 1 of
+`index.css` at weights 400/500/600/700/800/900. That weight list is driven by what the JSX actually
+uses (`font-medium` through `font-black`) — check before trimming it.
+
+All three font tokens deliberately resolve to the same family:
+
+```css
+@theme inline {
+  --font-sans:    "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    "Roboto", ui-sans-serif, system-ui, sans-serif;
+}
+```
+
+This is not leftover from an unfinished edit. The tokens stay separate so the ~80 existing
+`font-display` and `font-mono` classes keep working as live hooks — reintroducing a second face is a
+one-line change here and touches no component. `@layer base` applies `--font-sans` to `body` and
+`--font-display` to `h1`–`h6`.
+
+One consequence to know: `font-mono` is decorative in this codebase, not for code. `TextScramble`
+renders its whole animation in it and `StatsBar` uses it for the large counters — both relied on
+fixed character width to stay put. Under proportional Roboto they reflow slightly as characters
+change. If that ever needs undoing, point `--font-mono` at `"Roboto Mono", ui-monospace, monospace`
+and append `&family=Roboto+Mono:wght@400;500;700` to the import URL.
+
 ## When to use `dark:` instead of a token
 
 Almost never. A token swap covers ~95% of cases and is the reason this refactor was cheap. Reach for

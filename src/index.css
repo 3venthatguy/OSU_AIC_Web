@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 /* Class-based dark mode. Tailwind v4 defaults `dark:` to prefers-color-scheme;
@@ -152,9 +152,12 @@
    emits `var(--ui-*)` instead, so the cascade does the theming for us.
    --------------------------------------------------------------------------- */
 @theme inline {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Plus Jakarta Sans", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* All three resolve to Roboto on purpose: the site is single-typeface. The
+     tokens stay distinct so `font-display` / `font-mono` remain live hooks if a
+     second face is ever reintroduced. */
+  --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Roboto", ui-sans-serif, system-ui, sans-serif;
 
   --color-bg-primary: var(--ui-bg-primary);
   --color-bg-secondary: var(--ui-bg-secondary);

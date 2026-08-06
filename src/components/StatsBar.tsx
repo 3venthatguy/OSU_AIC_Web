@@ -11,9 +11,9 @@ interface StatItem {
 export const StatsBar: React.FC = () => {
   const statsList: StatItem[] = [
     { target: 120, suffix: '+', label: 'Active Members' },
-    { target: 3, suffix: '', label: 'Years Active' },
-    { target: 18, suffix: '', label: 'Projects Launched' },
-    { target: 12, suffix: 'K', prefix: '$', label: 'HackAI Prize Pool' }
+    { target: 10, suffix: '', label: 'Years Active' },
+    { target: 1, suffix: '', label: 'Projects Launched' },
+    { target: 5, suffix: 'K', prefix: '$', label: 'HackAI Prize Pool' }
   ];
 
   const [counts, setCounts] = useState<number[]>([0, 0, 0, 0]);

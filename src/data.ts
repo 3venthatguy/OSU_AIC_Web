@@ -45,12 +45,12 @@ export const OFFICERS: Officer[] = [
     }
   },
   {
-    id: 'vice-president-tbd',
-    name: 'TBD',
+    id: 'aayush-paul',
+    name: 'Aayush Paul',
     role: 'Vice President',
     major: 'TBD',
     year: 'TBD',
-    initials: 'VP',
+    initials: 'AP',
     bio: 'Oversees member onboarding and workshop programming. This seat is open — see the Events page for how to get involved.',
     socials: {}
   },
@@ -65,9 +65,20 @@ export const OFFICERS: Officer[] = [
     socials: {}
   },
   {
+    id: 'harker-lecroy',
+    name: 'Harker LeCroy',
+    role: 'Communications Officer',
+    major: 'Electrical & Computer Engineering',
+    minor: 'Robotics & Autonomous Systems',
+    year: '2nd Year',
+    initials: 'HL',
+    bio: 'Manages industry partnerships, sponsorships, and speaker invitations.',
+    socials: {}
+  },
+  {
     id: 'cynthia-lm',
     name: 'Cynthia Lm',
-    role: 'Chief Technology Officer',
+    role: 'Technology Officer',
     major: 'Data Analytics',
     minor: 'Cognitive Science',
     year: '3rd Year',
@@ -78,28 +89,17 @@ export const OFFICERS: Officer[] = [
   {
     id: 'evan-menges',
     name: 'Evan Menges',
-    role: 'Chief Technology Officer',
+    role: 'Technology Officer',
     major: 'Electrical Engineering + Economics',
     minor: 'Nuclear Engineering',
     year: '4th Year',
     initials: 'EM',
-    bio: 'Co-leads the club\'s technical programming and maintains this website and the club\'s developer tooling.',
+    bio: 'Co-leads the club\'s technical programming, maintains this website, and manages the club\'s developer tooling.',
     photo: evanMengesPhoto,
     socials: {
       linkedin: 'https://www.linkedin.com/in/evan-menges/',
       github: 'https://github.com/3venthatguy'
     }
-  },
-  {
-    id: 'harker-lecroy',
-    name: 'Harker LeCroy',
-    role: 'Chief Communications Officer',
-    major: 'Electrical & Computer Engineering',
-    minor: 'Robotics & Autonomous Systems',
-    year: '2nd Year',
-    initials: 'HL',
-    bio: 'Manages industry partnerships, sponsorships, and speaker invitations.',
-    socials: {}
   },
   {
     id: 'sushmita-sudhan',

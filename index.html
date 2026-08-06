@@ -6,6 +6,13 @@
     <meta name="color-scheme" content="light dark" />
     <title>Ohio State AI Club</title>
     <!--
+      Roboto is pulled in by an @import at the top of src/index.css, which means
+      its request cannot start until that stylesheet has already been fetched and
+      parsed. Warming both origins here overlaps the DNS/TLS cost with that wait.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
       Applies the stored theme BEFORE first paint. Must stay inline and blocking:
       the module bundle loads too late, so deferring this flashes a white page at
       every dark-mode visitor. Key must match THEME_STORAGE_KEY in src/theme.ts.

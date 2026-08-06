@@ -12,7 +12,7 @@ An elegant, high-performance, and feature-rich official web application for the 
 
 *   **Interactive Hero Canvas**: An elegant, responsive, and performance-optimized interactive neural network background canvas representing node connectivity and signal pulses.
 *   **The Projects Incubator Program**: An interactive, dynamic projects panel with keyword searches, technology filtering (e.g., CV, NLP, RL), detailed architecture deep-dives modal, and online student program registration or lead project proposal pitch forms.
-*   **Integrated Scrambled Typography**: Dynamic text scramble animations on primary pages and titles using fluid tracking and Inter & JetBrains Mono aesthetic type pairings.
+*   **Integrated Scrambled Typography**: Dynamic text scramble animations on primary pages and titles using fluid tracking and a unified Roboto type system.
 *   **HackAI Centerstage**: A customized dashboard highlighting previous years' metrics, upcoming deadlines, interactive registration wizards, and scheduled tracks.
 *   **Academic Events Hub**: A filterable events calendar displaying current speaker sessions, research workshops, social mixers, and custom RSVP states.
 *   **Fluid Responsive Layout**: Built screen-agnostically styled with Tailwind CSS, touch-safe interactives, custom scroll draw SVG paths, and a dark twilight color profile paired with rich carbon slate accents.

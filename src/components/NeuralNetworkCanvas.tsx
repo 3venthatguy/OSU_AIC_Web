@@ -454,6 +454,90 @@ export const NeuralNetworkCanvas: React.FC = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('smoothscroll', handleScroll, { passive: true });
 
+    /* ---------------------------------------------------------------------
+       Responsive placement.
+
+       The lattice used to sit at fixed world coordinates (x = 3.0, scale 1.0),
+       but the frustum is not fixed: half-width at the lattice plane is
+       tan(fov/2) * cameraZ * aspect, so it collapses as the viewport narrows.
+       At wide aspects that constant offset looked right; below ~1.4 the object
+       ran off the right edge, and it always overlapped the heading because
+       nothing knew where the text column ended.
+
+       So both the centre and the scale are derived from the frustum and from a
+       live measurement of the text column instead of being hardcoded.
+       --------------------------------------------------------------------- */
+    const BASE_CAMERA_Z = 9.0;
+    // Circumscribed radius of the node lattice: corner node at (1.8, 1.2, 1.2)
+    // plus a hovered node's inflated radius (0.18 * 1.45). Using the
+    // circumscribed sphere keeps this valid at every drag angle.
+    const GROUP_RADIUS = Math.hypot(1.8, 1.2, 1.2) + 0.18 * 1.45;
+    const GROUP_Y_OFFSET = 0.5;
+    // Where the lattice sits inside the free band left of the right edge:
+    // 0 hugs the heading, 1 hugs the screen edge, 0.5 centres it. Biasing below
+    // 0.5 pulls it left at the cost of size, since the fit is two-sided.
+    const BAND_BIAS = 0.42;
+    // Gap held between the heading and the lattice's bounding circle.
+    const TEXT_GUTTER_PX = 40;
+    // Keeps the bounding circle off the viewport edge.
+    const EDGE_MARGIN = 1.0;
+    // Mouse parallax is added to position after scaling, so it has to be
+    // reserved out of the budget below — otherwise the fitted radius consumes
+    // the whole band and the parallax swing pushes the lattice back off-screen.
+    // Must track the multipliers applied to parallaxRef in the render loop.
+    const PARALLAX_X = 0.12;
+    const PARALLAX_Y = 0.08;
+
+    const heroTextEl = document.getElementById('hero-left-col');
+
+    let restCenterX = 0;
+    let restScale = 1;
+
+    const measureSafeBand = () => {
+      const halfH = Math.tan((camera.fov * Math.PI) / 180 / 2) * BASE_CAMERA_Z;
+      const halfW = halfH * (width / height);
+
+      const containerRect = container.getBoundingClientRect();
+      const textRect = heroTextEl?.getBoundingClientRect();
+      // Below `lg` the overlay's parent is `display:none`, so the rect reads all
+      // zeros — the lattice then owns the full width and simply centres. This is
+      // why the breakpoint is never named here: the DOM already knows it.
+      const hasText =
+        !!textRect && textRect.width > 0 && textRect.height > 0 && containerRect.width > 0;
+
+      // Left edge of the band the lattice may occupy, in NDC.
+      let leftNdc = -1;
+      if (hasText) {
+        const leftPx = textRect.right - containerRect.left + TEXT_GUTTER_PX;
+        // Never surrender more than 60% of the width, or the lattice would be
+        // squeezed to nothing on a very wide heading.
+        leftNdc = Math.min((leftPx / containerRect.width) * 2 - 1, 0.2);
+      }
+
+      // The bias only means something relative to a heading. With no text column
+      // the band is the whole screen, so fall back to a true centre — otherwise
+      // mobile would drift left of centre and shrink for no reason.
+      const bias = hasText ? BAND_BIAS : 0.5;
+      const centerNdc = leftNdc + (1 - leftNdc) * bias;
+      restCenterX = centerNdc * halfW;
+
+      // Clear whichever side of the chosen centre is nearer. At BAND_BIAS 0.5
+      // this is just half the band; off-centre it tightens the fit, so biasing
+      // toward the heading shrinks the lattice rather than colliding with it.
+      const halfSpanNdc = Math.min(centerNdc - leftNdc, 1 - centerNdc);
+      const availableHalfW = halfSpanNdc * halfW - PARALLAX_X;
+      const availableHalfH = halfH - GROUP_Y_OFFSET - PARALLAX_Y;
+      const fitRadius = Math.max(0, Math.min(availableHalfW, availableHalfH)) * EDGE_MARGIN;
+      // Capped at 1 so ultrawide displays don't inflate it past its design size.
+      restScale = Math.min(1.0, fitRadius / GROUP_RADIUS);
+    };
+
+    measureSafeBand();
+
+    // The heading's box moves when its webfont swaps in, which changes where the
+    // safe band starts. Re-measure once Roboto has actually painted.
+    document.fonts?.ready.then(measureSafeBand).catch(() => {});
+
     // GSAP scale emergence on mount (starts subtle and expands)
     const emergence = { scale: 0.6 };
     const scaleTween = gsap.to(emergence, {
@@ -479,18 +563,19 @@ export const NeuralNetworkCanvas: React.FC = () => {
       // lerps below overshoot and the whole scene visibly snaps.
       const relativeTimeSpeed = Math.min(delta / (1 / 60) || 1.0, 3.0);
 
-      // Detect device category for styling and scaling responsiveness
-      const isMobile = width < 768;
-      const isTablet = width >= 768 && width < 1024;
-      const deviceScale = isMobile ? 0.55 : (isTablet ? 0.75 : 1.0);
-
       // Dampened lerp for butter-smooth scroll responsive animation
       currentScrollProgress += (targetScrollProgress - currentScrollProgress) * 0.08 * relativeTimeSpeed;
 
+      // How far through the hero reveal we are. The safe-band constraints apply
+      // in full at rest and are released as the camera pushes through, so
+      // scrolling still gets the deliberate overflowing zoom.
+      const revealT = Math.min(currentScrollProgress, 1.0);
+
       // 1. SCROLL ZOOM & EXPANSION
       // Expand spacing and scale up the cubic object to fill the screen
+      const layoutScale = restScale + (1.0 - restScale) * revealT;
       const scrollScale = 1.0 + currentScrollProgress * 1.5;
-      const finalScale = emergence.scale * scrollScale * deviceScale;
+      const finalScale = emergence.scale * scrollScale * layoutScale;
       networkGroup.scale.set(finalScale, finalScale, finalScale);
 
       // Move camera closer and Zoom past the cubic object
@@ -501,13 +586,15 @@ export const NeuralNetworkCanvas: React.FC = () => {
       parallaxRef.current.x += (mouseRef.current.x * 0.12 - parallaxRef.current.x) * 0.03 * relativeTimeSpeed;
       parallaxRef.current.y += (mouseRef.current.y * 0.08 - parallaxRef.current.y) * 0.03 * relativeTimeSpeed;
       
-      // Calculate responsive horizontal offset (shift right on desktop screens, center on mobile)
-      // As scroll progress increases, decrease the offset to bring it into center for full-screen zoom
-      const maxOffset = isMobile ? 0 : (isTablet ? 0.8 : 2.0);
-      const currentOffset = maxOffset * (1.5 - Math.min(currentScrollProgress, 1.0) * 3.5);
+      // Horizontal offset: starts at the centre of the safe band measured above
+      // (already 0 on mobile, where there is no text column to dodge), slides
+      // through screen centre and out the far side as the camera pushes in.
+      const currentOffset = restCenterX * (1.0 - revealT * 2.333);
 
       networkGroup.position.x = parallaxRef.current.x + currentOffset;
-      networkGroup.position.y = parallaxRef.current.y + 0.5;
+      // GROUP_Y_OFFSET, not a literal: measureSafeBand() budgets the vertical
+      // fit against this exact value, so the two must never drift apart.
+      networkGroup.position.y = parallaxRef.current.y + GROUP_Y_OFFSET;
 
       // If we are not actively dragging, apply momentum velocities and simulate friction
       if (!isDragging) {
@@ -611,10 +698,16 @@ export const NeuralNetworkCanvas: React.FC = () => {
 
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      // Must follow the width/height update — the band is derived from them.
+      measureSafeBand();
     };
 
     const resizeObserver = new ResizeObserver(() => handleResize());
     resizeObserver.observe(container);
+    // The heading reflows to a different number of lines at some widths, which
+    // moves the band's left edge without the container ever changing size.
+    if (heroTextEl) resizeObserver.observe(heroTextEl);
 
     container.addEventListener('pointerdown', handlePointerDown);
     container.addEventListener('pointermove', handlePointerMove);

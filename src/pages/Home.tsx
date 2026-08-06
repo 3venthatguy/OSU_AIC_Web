@@ -41,7 +41,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
           {/* Left Block — Text block with active pointer interaction for actions copy, clicks */}
           <div
             id="hero-left-col"
-            className="flex flex-col items-start justify-center text-left py-12 lg:py-24 pr-0 lg:pr-8 max-w-2xl pointer-events-auto select-none"
+            className="flex flex-col items-start justify-center text-left py-12 lg:py-24 pr-0 lg:pr-8 max-w-lg xl:max-w-xl 2xl:max-w-2xl pointer-events-auto select-none"
             {...heroReveal}
           >
             {/* Campus Eyebrow */}
@@ -55,7 +55,10 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             {/* Title stacked */}
             <h1
               id="hero-heading"
-              className="font-display text-[42px] md:text-[68px] lg:text-[72px] font-extrabold text-text-primary leading-[1.08] tracking-tight mb-6"
+              /* Only the lg+ steps ever render — this block is `hidden lg:block`.
+                 72px was the single size for everything above 1024px, which is
+                 what crowded the canvas on smaller laptops. */
+              className="font-display text-[42px] lg:text-[52px] xl:text-[62px] 2xl:text-[72px] font-extrabold text-text-primary leading-[1.08] tracking-tight mb-6"
             >
               <TextScramble id="hero-title-scramble-1" text="Artificial Intelligence Club" className="block text-text-primary" />
             </h1>
