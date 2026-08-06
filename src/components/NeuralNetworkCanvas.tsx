@@ -771,10 +771,21 @@ export const NeuralNetworkCanvas: React.FC = () => {
       ref={containerRef}
       className="relative w-full h-full min-h-[420px] md:min-h-[550px] flex items-center justify-center overflow-visible select-none cursor-grab active:cursor-grabbing"
     >
-      {/* Background soft ambient halo blur disc inside right column container */}
-      <div 
-        id="network-glow-disc" 
-        className="absolute w-[70%] h-[70%] rounded-full opacity-60 z-0 bg-[radial-gradient(circle,var(--ui-accent-primary-dim)_0%,transparent_70%)] pointer-events-none"
+      {/* Background soft ambient halo blur disc inside right column container.
+          `closest-side` sizing is load-bearing, not decoration: this box is
+          ~70% of the full hero section, which is far from square (~1.9:1 on a
+          typical desktop viewport). With no size keyword, `circle` defaults to
+          `farthest-corner` — the gradient's 100% radius is measured to the
+          box's diagonal corner. On a wide box that radius is much longer than
+          the distance to the top/bottom edges, so `transparent 70%` lands past
+          where those edges actually are, and the div clips the fade mid-way —
+          a faint but real rectangular seam at the box's own bounding edge.
+          `closest-side` guarantees the gradient reaches full transparency
+          before it ever reaches an edge, the same technique the two ambient
+          mesh lobes in BackgroundMesh.tsx already rely on. */}
+      <div
+        id="network-glow-disc"
+        className="absolute w-[70%] h-[70%] rounded-full opacity-60 z-0 bg-[radial-gradient(circle_closest-side,var(--ui-accent-primary-dim)_0%,transparent_70%)] pointer-events-none"
       />
       
       {loading && (

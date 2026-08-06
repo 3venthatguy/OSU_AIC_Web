@@ -53,14 +53,16 @@ export const Events: React.FC = () => {
   };
 
   return (
-    <div id="events-page-root" className="pt-[72px] bg-bg-primary min-h-screen">
+    <div id="events-page-root" className="pt-[72px] min-h-screen">
       
       {/* 1. EVENTS HERO & FILTER BAR */}
       <section
         id="events-hero-header"
         className="py-16 md:py-24 border-b border-border-subtle relative flex flex-col items-center justify-center text-center overflow-hidden"
       >
-        <div className="absolute right-0 top-0 w-[40%] h-full bg-[radial-gradient(circle_at_80%_20%,var(--ui-accent-primary-dim)_0%,transparent_50%)] pointer-events-none" />
+        {/* Green, not blue: the page mesh already puts a blue lobe at this exact
+            corner, so a blue glow here just doubled up. See docs/styling.md. */}
+        <div className="absolute right-0 top-0 w-[40%] h-full bg-[radial-gradient(circle_at_80%_20%,var(--ui-accent-secondary-dim)_0%,transparent_50%)] pointer-events-none" />
         
         <div className="max-w-3xl mx-auto px-6 relative z-10 flex flex-col items-center" {...heroReveal}>
           <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.25em] block mb-4">
@@ -209,7 +211,7 @@ export const Events: React.FC = () => {
       </section>
 
       {/* 3. PAST EVENTS STRIP */}
-      <section id="past-events-stripe-section" className="py-20 bg-bg-secondary/40 border-t border-border-subtle">
+      <section id="past-events-stripe-section" className="py-20 bg-veil-band border-t border-border-subtle">
         <div className="max-w-7xl mx-auto px-6 md:px-16">
           
           <div className="flex items-center space-x-3 mb-10 select-none" {...pastHeaderReveal}>

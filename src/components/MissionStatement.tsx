@@ -9,7 +9,7 @@ export const MissionStatement: React.FC = () => {
   return (
     <section
       id="mission-statement-section"
-      className="py-24 bg-bg-secondary relative border-b border-border-subtle"
+      className="py-24 bg-veil-band relative border-b border-border-subtle"
     >
       <div className="max-w-4xl mx-auto px-6 text-center flex flex-col items-center">
         

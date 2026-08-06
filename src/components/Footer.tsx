@@ -27,11 +27,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, activePage }) => {
   return (
     <footer
       id="footer-contact"
-      className="bg-bg-primary pt-24 pb-12 relative overflow-hidden border-t border-border-subtle"
+      className="pt-24 pb-12 relative overflow-hidden border-t border-border-subtle"
     >
-      {/* Decorative gradient shadows */}
+      {/* Top hairline sheen. The corner glow that used to sit here was removed:
+          the page mesh already lands a purple lobe in the bottom-right, which is
+          exactly where the footer sits. */}
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-primary/20 to-transparent" />
-      <div className="absolute bottom-0 right-0 w-[40%] h-[300px] bg-[radial-gradient(circle_at_80%_80%,var(--ui-accent-primary-dim)_0%,transparent_60%)] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 md:px-16 grid grid-cols-1 lg:grid-cols-12 gap-16 pb-16">
         

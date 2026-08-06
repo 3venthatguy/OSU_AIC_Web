@@ -62,7 +62,18 @@ Every Layer 2 token becomes a full family of utilities: `--color-accent-primary`
 | `text-secondary` | `#4A5563` | `#B4BCC7` |
 | `text-muted` | `#8792A3` | `#7C8695` |
 | `text-nav` | `#2C333D` | `#C9D1DC` |
+| `veil-band` | `rgba(206,220,237,.55)` | `rgba(9,12,16,.50)` |
+| `veil-band-strong` | `rgba(206,220,237,.78)` | `rgba(9,12,16,.72)` |
 | `border-subtle` / `border-medium` / `border-strong` | blue-tinted hairlines | same, brighter |
+
+`veil-band` is for **alternating section bands**, and it replaced opaque `bg-bg-secondary` there.
+Bands are translucent now because the page mesh (below) has to read through them: a band is no
+longer "slightly darker grey" but "less of the mesh", which is a bigger perceived step than the 3%
+gap between `#F4F7FA` and `#E8EEF5` ever gave. `veil-band-strong` is the denser variant, used only
+by the sponsors bar. Both recede — darker than the page — in *both* themes.
+
+Don't use `veil-band` on a card. Cards stay opaque `bg-bg-elevated`; they need to read as objects
+sitting on the background, not as holes in it.
 
 ### Brand
 
@@ -81,7 +92,10 @@ to 4.9:1. Symmetrically, in dark mode `#4F9DDB` carries **dark** text (`on-accen
 — so an accent button's label is always `text-on-accent`, never `text-white`.
 
 Purple at `#8B4FDB` clears 3:1 but not 4.5:1 on charcoal, which is why the dark token lifts to
-`#A87BE8`. Use the raw `#8B4FDB` only for fills, borders, and large display type.
+`#A87BE8`. Use the raw `#8B4FDB` only for fills, borders, and large display type. For the same
+reason `accent-tertiary-on-inverse` is `#A87BE8` in *both* themes — 5.8:1 on the light-mode inverse
+panel (`#16191D`) and 4.6:1 on the dark-mode one (`#252A32`), where `#8B4FDB` would fall under 3:1
+against the lighter of the two.
 
 ### Inverse surfaces
 
@@ -95,7 +109,7 @@ read as panels instead of vanishing.
 | `surface-inverse` / `surface-inverse-deep` | panel background and its gradient end |
 | `text-on-inverse` / `text-on-inverse-muted` | type on those panels |
 | `border-inverse` | hairlines on those panels |
-| `accent-primary-on-inverse` / `accent-secondary-on-inverse` | **identical in both themes** — the panel is dark either way, so accents inside stay at the saturated end of the ramp |
+| `accent-primary-on-inverse` / `accent-secondary-on-inverse` / `accent-tertiary-on-inverse` | **identical in both themes** — the panel is dark either way, so accents inside stay at the saturated end of the ramp |
 | `overlay` | scrim over imagery (replaces `bg-black/60`) |
 | `nav-scrim` | the navbar's translucent scrolled background |
 
@@ -112,8 +126,54 @@ Effects are variables rather than tokens because they go inside arbitrary values
 - `var(--ui-accent-glow)` — the tint under accent button shadows
 - `var(--ui-shadow-color)` — neutral drop shadow; deepens to near-black in dark mode
 - `shadow-card` / `shadow-card-hover` — full card shadow utilities
+- `var(--ui-page-mesh)` / `var(--ui-page-mesh-column)` — the ambient background gradients
 
 Written as `shadow-[0_4px_14px_var(--ui-accent-glow)]`.
+
+The two mesh variables are **stacks of five and four radial-gradients**, not colors. They are
+deliberately absent from `@theme inline` — putting them in the color namespace would emit nonsense
+like `text-page-mesh`. Consume them as `bg-[image:var(--ui-page-mesh)]`.
+
+## The ambient background
+
+[`src/components/BackgroundMesh.tsx`](../src/components/BackgroundMesh.tsx) paints one fixed,
+full-viewport mesh gradient that every page floats over. Page roots carry no background at all;
+section bands are `veil-band`. Two soft lobes inside it drift on 48s and 64s translate-only loops
+(`animate-mesh-drift-a` / `-b`), hidden below `md` and gated behind `motion-safe:`.
+
+Three things about it are load-bearing:
+
+- **It must stay a sibling of `SmoothScrollProvider` in `App.tsx`, never inside it.** That provider
+  transforms `#smooth-scroll-content` every rAF, and a transformed ancestor makes descendant
+  `position: fixed` *and* `background-attachment: fixed` resolve against the transformed box rather
+  than the viewport. Anything anchored to the viewport has to live outside that subtree. For the
+  same reason, **never use `background-attachment: fixed` inside a page** — it would render one way
+  under `prefers-reduced-motion: reduce` (where the provider returns bare children) and another way
+  otherwise.
+- **`-z-10` is safe.** Nothing above it creates a stacking context — `body`'s `overflow-x: hidden`
+  propagates to the viewport so body doesn't clip, `#root` has no CSS, and
+  `#application-container-viewport` is a plain static flex container. It paints above body's
+  background color and below all in-flow content.
+- **`body` keeps only `background-color`.** Don't re-add a `background-image` there; it would stack a
+  second full-viewport gradient underneath the mesh and tint it. The flat fill still shows during
+  macOS rubber-band overscroll and backs `::-webkit-scrollbar-track`.
+
+### The mesh owns blue
+
+Pages still carry their own localized radial glow blobs, but since the mesh is blue-dominant and
+washes blue across the top of every page, **a section blob should carry green or purple, not blue** —
+otherwise it doubles up and goes muddy. Current assignment: About green, Events green, Get Involved
+purple. HackAI's hero blob and the footer's corner glow were removed outright because the mesh
+already covers exactly where they sat.
+
+### The Home exception
+
+[`Home.tsx`](../src/pages/Home.tsx)'s content wrapper is the one element that keeps an opaque
+`bg-bg-primary` — it slides up over the sticky three.js hero and has to occlude it. Instead of the
+shared mesh it paints its own opaque copy via `bg-[image:var(--ui-page-mesh-column)]`;
+`background-color` and `background-image` are different properties, so both classes apply without
+conflict. The column variant uses px radii tuned to that wrapper's real height rather than the
+viewport-relative percentages of the main mesh.
 
 ## Typography
 

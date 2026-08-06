@@ -12,7 +12,7 @@ export const FAQ: React.FC = () => {
   };
 
   return (
-    <section id="club-faqs" className="py-24 bg-bg-primary border-t border-border-subtle select-none">
+    <section id="club-faqs" className="py-24 border-t border-border-subtle select-none">
       <div className="max-w-3xl mx-auto px-6">
         <div className="mb-14 text-center" {...headerReveal}>
           <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.2em] block mb-3">

@@ -36,14 +36,17 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({ onNavigate }) => {
   const inPersonReveal = useRevealProps();
 
   return (
-    <div id="get-involved-page-root" className="pt-[72px] bg-bg-primary min-h-screen">
+    <div id="get-involved-page-root" className="pt-[72px] min-h-screen">
 
       {/* 1. HERO */}
       <section
         id="get-involved-hero"
         className="py-20 md:py-28 relative overflow-hidden flex items-center justify-center text-center border-b border-border-subtle"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--ui-accent-primary-dim)_0%,transparent_55%)] pointer-events-none" />
+        {/* Purple, not blue: the page mesh already washes blue across the top of
+            every page, and purple ties the hero to this page's third pathway
+            card below. See docs/styling.md. */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--ui-accent-tertiary-dim)_0%,transparent_55%)] pointer-events-none" />
 
         <div className="max-w-3xl mx-auto px-6 relative z-10 flex flex-col items-center" {...heroReveal}>
           <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.25em] block mb-4">
@@ -301,7 +304,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({ onNavigate }) => {
       {/* 3. CONTACT LINKS */}
       <section
         id="get-involved-contact"
-        className="py-20 md:py-24 bg-bg-secondary/40 border-t border-border-subtle"
+        className="py-20 md:py-24 bg-veil-band border-t border-border-subtle"
       >
         <div className="max-w-5xl mx-auto px-6 md:px-16">
           <div className="mb-12 text-center" {...contactHeaderReveal}>

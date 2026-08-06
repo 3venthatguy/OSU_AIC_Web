@@ -23,12 +23,15 @@ export const SponsorsBar: React.FC = () => {
   return (
     <div
       id="sponsors-scrolling-band"
-      className="h-[120px] bg-bg-secondary border-y border-border-subtle relative flex items-center overflow-hidden z-10"
+      className="h-[120px] bg-veil-band-strong border-y border-border-subtle relative flex items-center overflow-hidden z-10"
     >
       <div className="w-full max-w-7xl mx-auto px-6 md:px-16 flex items-center justify-between">
         
-        {/* Left fixed label */}
-        <div className="flex items-center space-x-6 h-full flex-shrink-0 z-20 bg-bg-secondary pr-6 md:pr-10 border-r border-border-subtle">
+        {/* Left fixed label. No background of its own: it is a flex sibling of the
+            ticker, not an overlay — the marquee is already clipped by the ticker's
+            own overflow-hidden and edge mask — so a fill here would only double
+            the band's veil and stamp a visible rectangle on it. */}
+        <div className="flex items-center space-x-6 h-full flex-shrink-0 z-20 pr-6 md:pr-10 border-r border-border-subtle">
           <span className="font-sans text-[11px] md:text-[12px] font-bold text-text-muted uppercase tracking-[0.2em] whitespace-nowrap">
             Presenting Partners
           </span>

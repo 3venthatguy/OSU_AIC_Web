@@ -22,7 +22,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate }) => {
   return (
     <section
       id="about-teaser-section"
-      className="py-24 bg-bg-primary relative border-b border-border-subtle"
+      className="py-24 relative border-b border-border-subtle"
     >
       <div className="max-w-7xl mx-auto px-6 md:px-16 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
         

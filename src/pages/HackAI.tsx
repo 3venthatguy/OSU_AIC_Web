@@ -41,15 +41,13 @@ export const HackAI: React.FC = () => {
   ];
 
   return (
-    <div id="hackai-page-root" className="pt-[72px] bg-bg-primary min-h-screen">
+    <div id="hackai-page-root" className="pt-[72px] min-h-screen">
       
       {/* 1. HACKAI HERO WITH DETAILS */}
       <section
         id="hackai-hero"
-        className="py-16 md:py-24 border-b border-border-subtle relative overflow-hidden bg-[linear-gradient(135deg,var(--ui-bg-secondary)_0%,var(--ui-bg-primary)_60%,var(--ui-bg-sunken)_100%)] flex flex-col items-center justify-center text-center"
+        className="py-16 md:py-24 border-b border-border-subtle relative overflow-hidden flex flex-col items-center justify-center text-center"
       >
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_40%_30%,var(--ui-accent-primary-dim)_0%,transparent_50%)] pointer-events-none" />
-        
         <div className="max-w-4xl mx-auto px-6 relative z-10 flex flex-col items-center" {...heroReveal}>
           <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-accent-secondary/15 text-accent-secondary border border-accent-secondary/20 mb-5 select-none shadow-sm">
             {HACKAI_BANNER_BADGE}
@@ -137,7 +135,7 @@ export const HackAI: React.FC = () => {
       </section>
 
       {/* 3. WEEKEND SCHEDULE TIMELINE */}
-      <section id="hackai-timeline-section" className="py-24 bg-bg-secondary/40 border-y border-border-subtle">
+      <section id="hackai-timeline-section" className="py-24 bg-veil-band border-y border-border-subtle">
         <div className="max-w-3xl mx-auto px-6">
           <div className="mb-14 text-center select-none" {...scheduleHeaderReveal}>
             <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.2em] block mb-3">
@@ -178,7 +176,7 @@ export const HackAI: React.FC = () => {
       </section>
 
       {/* HackAI FAQ section */}
-      <section id="hackai-faqs" className="py-24 bg-bg-primary border-t border-border-subtle select-none">
+      <section id="hackai-faqs" className="py-24 border-t border-border-subtle select-none">
         <div className="max-w-3xl mx-auto px-6">
           <div className="mb-14 text-center" {...faqHeaderReveal}>
             <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.2em] block mb-3">

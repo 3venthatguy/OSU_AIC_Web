@@ -464,12 +464,11 @@ export const Projects: React.FC = () => {
   };
 
   return (
-    <div id="projects-page-root" className="pt-[72px] bg-bg-primary min-h-screen select-none">
+    <div id="projects-page-root" className="pt-[72px] min-h-screen select-none">
       
       {/* 1. HERO HEADER INTRO */}
-      <section id="projects-hero-banner" className="py-20 md:py-24 bg-gradient-to-b from-bg-secondary to-bg-primary border-b border-border-subtle relative overflow-hidden">
+      <section id="projects-hero-banner" className="py-20 md:py-24 bg-[linear-gradient(to_bottom,var(--ui-veil-band),rgba(0,0,0,0))] border-b border-border-subtle relative overflow-hidden">
         {/* Decorative elements representing AI connections */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
         <div className="absolute top-[20%] right-[10%] w-72 h-72 bg-accent-primary/5 rounded-full blur-3xl pointer-events-none" />
         
         <div className="max-w-7xl mx-auto px-6 md:px-16 relative z-10 flex flex-col items-center">
@@ -531,7 +530,7 @@ export const Projects: React.FC = () => {
       </section>
 
       {/* 2. DYNAMIC WORKSPACE EXPLORER */}
-      <section id="projects-browser-hub" className="py-24 bg-bg-primary max-w-7xl mx-auto px-6 md:px-16 grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
+      <section id="projects-browser-hub" className="py-24 max-w-7xl mx-auto px-6 md:px-16 grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
         
         {/* Left Column Filters (1 Col) */}
         <div id="filter-controls-sidebar" className="lg:col-span-1 border border-border-subtle rounded-2xl p-6 bg-bg-elevated/40 backdrop-blur-sm sticky top-24 self-start space-y-6" {...sidebarReveal}>

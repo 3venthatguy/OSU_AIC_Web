@@ -55,9 +55,14 @@
   --ui-border-inverse: rgba(255, 255, 255, 0.06);
 
   /* Accents used INSIDE an inverse panel. Those panels are dark in both themes,
-     so these stay at the bright end of the ramp and are identical in `.dark`. */
+     so these stay at the bright end of the ramp and are identical in `.dark`.
+     Tertiary takes the lifted #A87BE8 rather than the raw #8B4FDB for the same
+     reason it does in `.dark`: on the two inverse panel fills it measures
+     5.8:1 (#16191D) and 4.6:1 (#252A32), where #8B4FDB would fall under 3:1
+     against the lighter of the two. */
   --ui-accent-primary-on-inverse: #4F9DDB;
   --ui-accent-secondary-on-inverse: #4FDB8B;
+  --ui-accent-tertiary-on-inverse: #A87BE8;
 
   /* Scrims */
   --ui-overlay: rgba(11, 14, 18, 0.60);
@@ -81,7 +86,43 @@
   --ui-shadow-card-hover: 0 8px 28px rgba(22, 25, 29, 0.10);
   --ui-badge-accent: rgba(26, 122, 74, 0.12);
 
-  --ui-page-gradient: linear-gradient(135deg, #DCE7F4 0%, #F4F7FA 40%, #F7F5F0 100%);
+  /* Ambient page mesh — painted by BackgroundMesh.tsx on a fixed, full-viewport
+     layer behind everything. Blue dominates; purple and green are corner
+     accents. Alphas are calibrated against the #F4F7FA base: the old page
+     gradient's #DCE7F4 stop was algebraically --ui-accent-primary at a ≈ 0.12,
+     which is this project's established "visible but not muddy" line. The lead
+     lobe pushes to 0.20 but is anchored off-canvas (at 10% -8%) so the largest
+     value actually on screen lands near 0.15. Green is the darkest brand color
+     and dirties a light surface fastest, so it stays lowest.
+
+     Sizes are percentages, not rem: on a `fixed inset-0` layer that keeps every
+     lobe proportional to the viewport instead of collapsing on a phone. Every
+     ramp ends at `rgba(<same rgb>, 0)` rather than `transparent` so the result
+     doesn't depend on premultiplied gradient interpolation. */
+  --ui-page-mesh:
+    radial-gradient(ellipse 75% 60% at 10% -8%, rgba(42, 117, 179, 0.20) 0%, rgba(42, 117, 179, 0) 62%),
+    radial-gradient(ellipse 60% 55% at 92% 10%, rgba(42, 117, 179, 0.13) 0%, rgba(42, 117, 179, 0) 60%),
+    radial-gradient(ellipse 55% 50% at 82% 88%, rgba(107, 51, 184, 0.11) 0%, rgba(107, 51, 184, 0) 58%),
+    radial-gradient(ellipse 50% 45% at  4% 96%, rgba(26, 122, 74, 0.10) 0%, rgba(26, 122, 74, 0) 55%),
+    radial-gradient(ellipse 95% 75% at 50% 45%, rgba(42, 117, 179, 0.06) 0%, rgba(42, 117, 179, 0) 70%);
+
+  /* Home's content wrapper can't be transparent — it slides over the sticky
+     three.js hero and has to occlude it — so it gets its own opaque copy of the
+     mesh instead. Radii are px because this one is tuned to the wrapper's real
+     ~1300-1500px height, not to the viewport. Reads as a vertical journey:
+     blue -> green -> purple -> blue. */
+  --ui-page-mesh-column:
+    radial-gradient(900px 700px  at 90% 8%,   rgba(42, 117, 179, 0.15) 0%, rgba(42, 117, 179, 0) 64%),
+    radial-gradient(800px 640px  at  4% 38%,  rgba(26, 122, 74, 0.10) 0%, rgba(26, 122, 74, 0) 60%),
+    radial-gradient(900px 720px  at 94% 72%,  rgba(107, 51, 184, 0.12) 0%, rgba(107, 51, 184, 0) 62%),
+    radial-gradient(1000px 800px at 16% 100%, rgba(42, 117, 179, 0.14) 0%, rgba(42, 117, 179, 0) 66%);
+
+  /* Alternating section bands. These replace opaque bg-secondary now that the
+     mesh needs to read through: a band is no longer "slightly darker grey" but
+     "less of the mesh", which is a bigger perceived step than the old 3% gap
+     between #F4F7FA and #E8EEF5. Both themes recede rather than lift. */
+  --ui-veil-band: rgba(206, 220, 237, 0.55);
+  --ui-veil-band-strong: rgba(206, 220, 237, 0.78);
 }
 
 .dark {
@@ -121,6 +162,7 @@
   /* Intentionally unchanged from :root — inverse panels are dark in both themes. */
   --ui-accent-primary-on-inverse: #4F9DDB;
   --ui-accent-secondary-on-inverse: #4FDB8B;
+  --ui-accent-tertiary-on-inverse: #A87BE8;
 
   --ui-overlay: rgba(6, 8, 11, 0.66);
   --ui-nav-scrim: rgba(22, 25, 29, 0.82);
@@ -141,7 +183,27 @@
   --ui-shadow-card-hover: 0 8px 28px rgba(0, 0, 0, 0.55);
   --ui-badge-accent: rgba(79, 219, 139, 0.14);
 
-  --ui-page-gradient: linear-gradient(135deg, #1B2029 0%, #16191D 40%, #191C21 100%);
+  /* Same lobe geometry as :root, higher alpha. Glow on #16191D has far more
+     headroom than tint on #F4F7FA — blue at 0.26 resolves to about #253B4E,
+     a real glow, and still nowhere near washing out text-secondary #B4BCC7.
+     Purple here is the raw #8B4FDB (139,79,219), not the lifted #A87BE8: the
+     lift exists only so purple stays legible as a foreground, and this is a
+     fill. See docs/styling.md. */
+  --ui-page-mesh:
+    radial-gradient(ellipse 75% 60% at 10% -8%, rgba(79, 157, 219, 0.26) 0%, rgba(79, 157, 219, 0) 62%),
+    radial-gradient(ellipse 60% 55% at 92% 10%, rgba(79, 157, 219, 0.17) 0%, rgba(79, 157, 219, 0) 60%),
+    radial-gradient(ellipse 55% 50% at 82% 88%, rgba(139, 79, 219, 0.20) 0%, rgba(139, 79, 219, 0) 58%),
+    radial-gradient(ellipse 50% 45% at  4% 96%, rgba(79, 219, 139, 0.13) 0%, rgba(79, 219, 139, 0) 55%),
+    radial-gradient(ellipse 95% 75% at 50% 45%, rgba(79, 157, 219, 0.08) 0%, rgba(79, 157, 219, 0) 70%);
+
+  --ui-page-mesh-column:
+    radial-gradient(900px 700px  at 90% 8%,   rgba(79, 157, 219, 0.20) 0%, rgba(79, 157, 219, 0) 64%),
+    radial-gradient(800px 640px  at  4% 38%,  rgba(79, 219, 139, 0.12) 0%, rgba(79, 219, 139, 0) 60%),
+    radial-gradient(900px 720px  at 94% 72%,  rgba(139, 79, 219, 0.18) 0%, rgba(139, 79, 219, 0) 62%),
+    radial-gradient(1000px 800px at 16% 100%, rgba(79, 157, 219, 0.18) 0%, rgba(79, 157, 219, 0) 66%);
+
+  --ui-veil-band: rgba(9, 12, 16, 0.50);
+  --ui-veil-band-strong: rgba(9, 12, 16, 0.72);
 }
 
 /* ---------------------------------------------------------------------------
@@ -188,6 +250,7 @@
   --color-border-inverse: var(--ui-border-inverse);
   --color-accent-primary-on-inverse: var(--ui-accent-primary-on-inverse);
   --color-accent-secondary-on-inverse: var(--ui-accent-secondary-on-inverse);
+  --color-accent-tertiary-on-inverse: var(--ui-accent-tertiary-on-inverse);
 
   --color-overlay: var(--ui-overlay);
   --color-nav-scrim: var(--ui-nav-scrim);
@@ -201,6 +264,14 @@
   --color-status-danger: var(--ui-status-danger);
 
   --color-badge-accent: var(--ui-badge-accent);
+
+  /* Section bands. Deliberately no --color-page-mesh companion: a stack of five
+     gradients is not a color and must not enter the color namespace, where it
+     would emit nonsense like `text-page-mesh`. The mesh is consumed as
+     `bg-[image:var(--ui-page-mesh)]`, the same arbitrary-value idiom the
+     existing radial glow blobs use. */
+  --color-veil-band: var(--ui-veil-band);
+  --color-veil-band-strong: var(--ui-veil-band-strong);
 
   /* These three were referenced in 8 places but never defined, so they emitted
      no CSS at all. Defining them here restores the intended card styling. */
@@ -221,13 +292,79 @@
       transform: translateY(0);
     }
   }
+
+  /* Ambient drift for the two soft lobes inside BackgroundMesh. Translate only,
+     so once rasterized these live on the compositor and cost nothing per frame
+     — which matters because Home runs three.js and GSAP at the same time.
+     Deliberately not `background-position`: that repaints a full-viewport layer
+     on the main thread every frame. Deliberately not `filter: blur` either — a
+     blur forces a render surface, and a radial-gradient is already soft.
+     Periods are coprime-ish so the two never visibly resynchronize. */
+  --animate-mesh-drift-a: mesh-drift-a 48s ease-in-out infinite;
+  --animate-mesh-drift-b: mesh-drift-b 64s ease-in-out infinite;
+
+  @keyframes mesh-drift-a {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%      { transform: translate3d(4vw, 3vh, 0); }
+  }
+
+  @keyframes mesh-drift-b {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%      { transform: translate3d(-5vw, -3vh, 0); }
+  }
+
+  /* Drives the dots that travel the line-art brain in HackAITeaser.tsx.
+
+     Each signal path carries `pathLength="1"`, so its dash pattern is written
+     in fractions of the path rather than user units. Three things here are
+     load-bearing and will silently break if "simplified":
+
+     1. The dasharray at the call site sums to exactly 1 — one dash period per
+        path. stroke-dashoffset `d` puts the dash at path distance s = -d mod P,
+        so sweeping d from 1 to 0 walks it start-to-end and leaves the pattern
+        exactly in phase at the wrap. Any other range leaves it mid-phase and
+        the loop visibly jumps.
+     2. The dash LENGTH at the call site is 0, not a small fraction. pathLength
+        normalizes the pattern, not the rendering: 0.02 would be a 10-unit dash
+        on the 510-unit silhouette but 1.8 units on a 90-unit sulcus — a fat
+        lozenge on one path and a clean dot on another. A zero-length dash with
+        `stroke-linecap: round` renders a circle whose diameter is the stroke
+        width, identically on every path.
+     3. `linear`. The default `ease` makes every dot lurch at both ends.
+
+     The opacity ramp lives inside this same keyframe so it stays phase-locked
+     to the dashoffset sweep and cannot drift out of sync; it hides the instant
+     the dot teleports from the path end back to the path start.
+     stroke-dashoffset is deliberately NOT declared at 6%/94%, so it still
+     interpolates linearly across the whole run.
+
+     The 6s here is a fallback — every call site overrides animation-duration
+     inline, because duration has to be proportional to each path's real length
+     or dots on long and short paths move at wildly different apparent speeds.
+
+     This animates SVG geometry, which is a repaint rather than a compositor
+     op in every engine. Affordable because the spinning-hexagon markup it
+     replaced was already repainting the same ~300px region every frame. It is
+     also why there is no filter or drop-shadow near it: a filter would re-run
+     a blur over the whole bbox on every one of those frames. The glow is a
+     second, wider, low-stroke-opacity copy of the path instead. */
+  --animate-neural-signal: neural-signal 6s linear infinite;
+
+  @keyframes neural-signal {
+    0%      { stroke-dashoffset: 1; opacity: 0; }
+    6%, 94% { opacity: 1; }
+    100%    { stroke-dashoffset: 0; opacity: 0; }
+  }
 }
 
 @layer base {
+  /* The page gradient moved to BackgroundMesh.tsx. body keeps only the flat
+     fill, which still shows during macOS rubber-band overscroll (the mesh layer
+     stops at the viewport edge) and backs ::-webkit-scrollbar-track below.
+     Don't re-add a background-image here — it would stack a second
+     full-viewport gradient underneath the mesh and tint it. */
   body {
     background-color: var(--ui-bg-primary);
-    background-image: var(--ui-page-gradient);
-    background-attachment: fixed;
     color: var(--ui-text-secondary);
     font-family: var(--font-sans);
     overflow-x: hidden;

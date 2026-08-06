@@ -9,6 +9,7 @@ import { Projects } from './pages/Projects';
 import { GetInvolved } from './pages/GetInvolved';
 import { SmoothScrollProvider } from './components/SmoothScrollProvider';
 import { PageTransition } from './components/PageTransition';
+import { BackgroundMesh } from './components/BackgroundMesh';
 
 export default function App() {
   const [activePage, setActivePage] = useState<string>('home');
@@ -34,6 +35,11 @@ export default function App() {
 
   return (
     <div id="application-container-viewport" className="min-h-screen flex flex-col justify-between">
+      {/* Site-wide ambient gradient. Must stay a sibling of SmoothScrollProvider
+          rather than living inside it — see BackgroundMesh.tsx. It is `fixed`, so
+          it is out of flow and does not become a flex item here. */}
+      <BackgroundMesh />
+
       {/* Navigation header pinned to the top of all pages */}
       <Navbar activePage={activePage} onNavigate={setActivePage} />
 

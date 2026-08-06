@@ -114,10 +114,18 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* 2-8. OVERLAPPING CONTENT WRAPPER */}
-      <div className="relative z-10 bg-bg-primary shadow-[0_-15px_30px_var(--ui-shadow-color)] border-t border-border-subtle">
+      {/* 2-8. OVERLAPPING CONTENT WRAPPER
+
+          This one keeps an opaque `bg-bg-primary` on purpose — it slides up over
+          the sticky three.js hero and has to occlude it. So instead of letting
+          the site-wide mesh show through, it paints its own opaque copy:
+          `bg-bg-primary` sets background-color and the mesh sets
+          background-image, so both classes apply without conflict. The column
+          variant is tuned to this wrapper's height and reads as a vertical
+          journey (blue -> green -> purple -> blue) rather than a flat slab. */}
+      <div className="relative z-10 bg-bg-primary bg-[image:var(--ui-page-mesh-column)] shadow-[0_-15px_30px_var(--ui-shadow-color)] border-t border-border-subtle">
         {/* Mobile/Tablet Hero Title Card - Displays at the top of the flowing content card wrapper, sliding gracefully up over the full 3D interactive backdrop */}
-        <div className="block lg:hidden w-full max-w-7xl mx-auto px-6 md:px-16 py-16 md:py-24 border-b border-border-subtle bg-bg-primary">
+        <div className="block lg:hidden w-full max-w-7xl mx-auto px-6 md:px-16 py-16 md:py-24 border-b border-border-subtle">
           <div className="flex flex-col items-start justify-center text-left max-w-2xl select-none" {...mobileHeroReveal}>
             {/* Campus Eyebrow */}
             <div className="flex items-center space-x-2.5 mb-5">

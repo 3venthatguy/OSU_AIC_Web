@@ -316,7 +316,7 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div id="about-page-root" className="pt-[72px] bg-bg-primary min-h-screen">
+    <div id="about-page-root" className="pt-[72px] min-h-screen">
       
       {/* 1. ABOUT HERO */}
       {/* `flex-col`, not the previous `items-center justify-center`: those centre
@@ -354,7 +354,7 @@ export const About: React.FC<AboutProps> = ({ onNavigate }) => {
       <AboutSection onNavigate={onNavigate || (() => {})} />
 
       {/* 3. CURRENT OFFICERS SUB-SECTION */}
-      <section id="officers-list-section" className="py-24 bg-bg-secondary border-t border-border-subtle relative">
+      <section id="officers-list-section" className="py-24 bg-veil-band border-t border-border-subtle relative">
 
         <div className="max-w-7xl mx-auto px-6 md:px-16">
           <div id="officers-header" className="mb-14 text-center" {...officersHeaderReveal}>
