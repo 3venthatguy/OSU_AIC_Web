@@ -116,11 +116,55 @@ effect subscribes once and repaints existing materials in place — including ea
 An inline blocking script in `index.html` applies the class before first paint. Full details and the
 token tables are in [styling.md](styling.md).
 
+## Boot sequence
+
+First paint is a splash: the club mark as a dim silhouette with the accent colour sweeping across it,
+a `LOADING` / `NN%` meter, and then an accent band that sweeps bottom-to-top and uncovers the site.
+It runs once per browser session (`sessionStorage['aic-splash-seen']`).
+
+**It is static markup and an inline script in `index.html`, not a component, and that is the entire
+point.** The bundle is ~1MB / ~300kB gzipped; a React splash could not render until that had already
+downloaded and mounted, which is precisely the wait it exists to cover. Living in the HTML means it
+paints off the initial response while the bundle is still in flight. For the same reason it cannot
+depend on `src/index.css` — that stylesheet is render-blocking behind a Google Fonts `@import` — so
+it carries its own inline `<style>`, its own literal copies of the colour tokens, and a system
+monospace stack. See [styling.md](styling.md#boot-splash-tokens).
+
+The mark is `public/aic-mark.png`, a 256px downscale of the logo. It is in `public/` rather than
+`assets/` because Vite content-hashes anything imported from `assets/`, and static HTML has no way to
+learn the hashed filename.
+
+### The `data-booting` contract
+
+Other entrance animations would otherwise run and finish *behind* the opaque splash, so that the
+visitor's first sight of the page is a static one. All three are held:
+
+| Consumer | What is held |
+|---|---|
+| `src/hooks/useReveal.ts` | Targets are queued instead of observed, then handed to the observer in one batch |
+| `src/components/NeuralNetworkCanvas.tsx` | The GSAP scale-emergence tween is created `paused` and played later |
+| `src/components/Navbar.tsx` | The fixed header fades/drops in, `NAV_ENTRANCE_DELAY` ms *after* the event, so it settles behind the hero rather than alongside it |
+
+The protocol is: the inline script sets `data-booting` on `<html>`, and dispatches a
+`aic:boot-complete` event on `window` as the band clears the middle of the screen. Consumers read the
+attribute once at module/effect setup and listen for the event.
+
+Both halves fail open. `data-booting` absent means run immediately (the session-skip path), and the
+inline script's **8-second safety timeout** dispatches `aic:boot-complete` even when the bundle it was
+waiting on never arrives — so a failed deploy degrades to an un-animated page, never to a page
+stranded at `opacity: 0` behind a splash that will not lift.
+
+`src/splash.ts` is the React-side half: it reports the mount milestone, preloads the above-the-fold
+images (deliberately *not* the About gallery), and calls `finish()`. It no-ops when
+`window.__aicSplash` is undefined, which is how the session-skip path stays branch-free.
+
 ## Scroll reveals
 
 `src/hooks/useReveal.ts` runs a single shared `IntersectionObserver` for every reveal target on the
 site, replacing the per-component observers `StatsBar` and `MissionStatement` used to each own.
 `StatsBar` now drives its count-up from the same `isRevealed` flag that fades the band in.
+
+Reveals are held while the boot splash is up — see the `data-booting` contract above.
 
 It has **two entry points and they are not interchangeable** — a wrapper breaks `divide-*` and
 `col-span-*` layouts, while an in-place reveal silently overrides a hover transform. The rules, and

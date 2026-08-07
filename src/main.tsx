@@ -4,9 +4,14 @@ import App from './App.tsx';
 import './index.css';
 import aiLogo from '../assets/images/AI_Logo_Final.png';
 import { initTheme, subscribe } from './theme';
+import { startSplashHandoff } from './splash';
 
 // Reconcile the class set by the pre-paint script in index.html with the store.
 initTheme();
+
+// Tell the boot splash the bundle has executed, and let it track the remaining
+// critical images. No-ops when the splash was skipped for this session.
+startSplashHandoff();
 
 // Dynamically generate a high-quality app icon/favicon with a rounded themed background.
 const setupDynamicFavicon = () => {

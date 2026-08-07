@@ -538,14 +538,35 @@ export const NeuralNetworkCanvas: React.FC = () => {
     // safe band starts. Re-measure once Roboto has actually painted.
     document.fonts?.ready.then(measureSafeBand).catch(() => {});
 
-    // GSAP scale emergence on mount (starts subtle and expands)
-    const emergence = { scale: 0.6 };
+    // GSAP scale emergence on mount: the network starts fully zoomed out and
+    // zooms into frame.
+    //
+    // It starts at 0 rather than part-way. Entering at 0.6 meant the object was
+    // already most of its final size on the first frame, so the tween read as a
+    // pop rather than an arrival — and `power2.out` spent most of that short
+    // remaining distance immediately, which is what made it look like a glitch.
+    // From 0 over a longer `power3.out` it rushes in and decelerates into place.
+    //
+    // Held while the boot splash is up, for the same reason the scroll reveals
+    // are: unpaused it would run and complete behind the overlay, and the hero
+    // would simply be sitting at its final scale when the splash lifts. Same
+    // `data-booting` / `aic:boot-complete` contract as useReveal.ts.
+    const emergence = { scale: 0 };
+    const booting = document.documentElement.hasAttribute('data-booting');
     const scaleTween = gsap.to(emergence, {
       scale: 1.0,
-      duration: 1.2,
-      ease: 'power2.out',
-      delay: 0.2
+      duration: 1.6,
+      ease: 'power3.out',
+      // Long enough for the exit band to be clear of the middle of the screen
+      // before the zoom starts, so the two do not read as one muddled motion.
+      delay: 0.15,
+      paused: booting
     });
+
+    const startEmergence = () => scaleTween.play();
+    if (booting) {
+      window.addEventListener('aic:boot-complete', startEmergence, { once: true });
+    }
 
     // Animation loop
     let animationFrameId: number;
@@ -723,6 +744,7 @@ export const NeuralNetworkCanvas: React.FC = () => {
       observer.disconnect();
       unsubscribeTheme();
       scaleTween.kill();
+      window.removeEventListener('aic:boot-complete', startEmergence);
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('smoothscroll', handleScroll);
       container.removeEventListener('pointerdown', handlePointerDown);

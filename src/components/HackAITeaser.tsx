@@ -219,11 +219,18 @@ export const HackAITeaser: React.FC<HackAITeaserProps> = ({ onNavigate }) => {
                 Registration Now Open
               </span>
               
-              <h3 className="font-display text-[44px] md:text-[68px] font-extrabold text-on-inverse leading-none tracking-tighter mb-4">
+              {/* `text-text-on-inverse`, not `text-on-inverse`. The token is
+                  registered as `--color-text-on-inverse`, so the utility carries
+                  the `text-` prefix twice — once for the property, once as part
+                  of the token name. The shorter spelling matches no token, emits
+                  no rule, and silently leaves these inheriting `text-primary`,
+                  which flips with the theme and goes near-black on this
+                  permanently dark card. */}
+              <h3 className="font-display text-[44px] md:text-[68px] font-extrabold text-text-on-inverse leading-none tracking-tighter mb-4">
                 {HACKAI_NAME}
               </h3>
-              
-              <p className="font-sans text-[15px] md:text-[17px] text-on-inverse-muted leading-relaxed max-w-lg mb-8">
+
+              <p className="font-sans text-[15px] md:text-[17px] text-text-on-inverse-muted leading-relaxed max-w-lg mb-8">
                 36 Hours. 100+ Builders. $5,000+ in prizes. Combine prompt compilers, image diffusion, reinforcement learning, and LLM fine-tunes to build systems that reshape computing.
               </p>
             </div>
@@ -241,7 +248,7 @@ export const HackAITeaser: React.FC<HackAITeaserProps> = ({ onNavigate }) => {
                 <ArrowRight className="w-4 h-4" />
               </button>
 
-              <div className="flex items-center space-x-5 text-[13px] md:text-[14px] text-on-inverse/70 font-mono">
+              <div className="flex items-center space-x-5 text-[13px] md:text-[14px] text-text-on-inverse/70 font-mono">
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4 text-accent-secondary" />
                   <span>{HACKAI_DATE_FULL}</span>

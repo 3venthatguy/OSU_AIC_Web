@@ -8,9 +8,54 @@ interface NavbarProps {
   onNavigate: (page: string) => void;
 }
 
+/**
+ * How long after the boot band clears before the header drops in, in ms.
+ *
+ * The header is the one fixed element on screen, so landing it at the same
+ * moment as the hero reads as two things arriving at once. Holding it back by
+ * roughly one reveal step lets the hero start first and the chrome settle after.
+ * Keep it under ~600ms — longer and the page looks like it is missing its nav.
+ */
+const NAV_ENTRANCE_DELAY = 420;
+
+function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  /**
+   * Held while the boot splash is up — see the `data-booting` contract in
+   * docs/architecture.md. Fails open: an absent attribute (session-skip path, or
+   * reduced motion, where there is no band to arrive behind) means visible from
+   * the first frame, and the splash's 8s safety net dispatches the event even
+   * when the load it was waiting on never completes.
+   */
+  const [entered, setEntered] = useState(
+    () =>
+      typeof document === 'undefined' ||
+      !document.documentElement.hasAttribute('data-booting') ||
+      prefersReducedMotion(),
+  );
+
+  useEffect(() => {
+    if (entered) return;
+    let timer: number | undefined;
+    const onBoot = () => {
+      timer = window.setTimeout(() => setEntered(true), NAV_ENTRANCE_DELAY);
+    };
+    window.addEventListener('aic:boot-complete', onBoot, { once: true });
+    return () => {
+      window.removeEventListener('aic:boot-complete', onBoot);
+      if (timer !== undefined) clearTimeout(timer);
+    };
+    // Runs once: `entered` only ever goes false -> true, and the guard above
+    // makes a re-run after that a no-op.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const handleScroll = (e?: Event) => {
@@ -57,6 +102,10 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
           scrolled || activePage !== 'home'
             ? 'bg-nav-scrim backdrop-blur-xl border-b border-border-subtle shadow-[0_1px_12px_var(--ui-shadow-color)]'
             : 'bg-transparent'
+        } ${
+          // Boot entrance. `pointer-events-none` matters: an invisible header
+          // still sits over the top 72px of the hero and would swallow clicks.
+          entered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3 pointer-events-none'
         }`}
       >
         {/* The left and right rails both carry `flex-1` so they claim equal width.

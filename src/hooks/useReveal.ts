@@ -58,6 +58,36 @@ const callbacks = new Map<Element, () => void>();
 
 let observer: IntersectionObserver | null = null;
 
+/**
+ * Hold reveals while the boot splash is up.
+ *
+ * Everything above the fold is already intersecting when the app mounts, so
+ * without this the hero's whole staggered sequence plays out behind an opaque
+ * overlay and is finished by the time the splash lifts — the visitor's first
+ * sight of the page is a static one. `data-booting` is set by the inline script
+ * in index.html and cleared as the exit band clears the middle of the screen.
+ *
+ * Fails open in both directions: absent attribute means observe immediately,
+ * and the splash's 8s safety net dispatches `aic:boot-complete` even when the
+ * bundle it was waiting on never arrives, so nothing can strand at opacity 0.
+ */
+let bootHold =
+  typeof document !== 'undefined' && document.documentElement.hasAttribute('data-booting');
+const held = new Set<Element>();
+
+if (bootHold) {
+  window.addEventListener(
+    'aic:boot-complete',
+    () => {
+      bootHold = false;
+      const io = getObserver();
+      held.forEach((node) => (io ? io.observe(node) : callbacks.get(node)?.()));
+      held.clear();
+    },
+    { once: true },
+  );
+}
+
 function getObserver(): IntersectionObserver | null {
   if (!supportsObserver) return null;
   if (!observer) {
@@ -97,6 +127,7 @@ export function useReveal() {
     const el = elementRef.current;
     if (!el) return;
     callbacks.delete(el);
+    held.delete(el);
     getObserver()?.unobserve(el);
     elementRef.current = null;
   }, []);
@@ -114,7 +145,10 @@ export function useReveal() {
 
       elementRef.current = node;
       callbacks.set(node, () => setIsRevealed(true));
-      io.observe(node);
+      // Queued rather than observed while the splash is up; the boot-complete
+      // listener above hands the whole batch to the observer at once.
+      if (bootHold) held.add(node);
+      else io.observe(node);
     },
     [cleanup],
   );

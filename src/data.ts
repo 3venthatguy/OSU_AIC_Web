@@ -3,7 +3,7 @@ import { Officer, ClubEvent, ProjectItem } from './types';
 // Officer headshots are bundled assets, not remote URLs: hotlinked CDN images
 // (LinkedIn in particular) carry signed expiry params and go dead without warning.
 // Drop a square crop into assets/profiles/, import it here, and set `photo`.
-import evanMengesPhoto from '../assets/profiles/evan-menges.png';
+import evanMengesPhoto from '../assets/profiles/evan-menges.webp';
 
 export const CLUB_EMAIL = "osuaiclub@gmail.com";
 export const CLUB_DISCORD_URL = "https://discord.com/invite/GPCmTECWRu";

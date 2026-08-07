@@ -226,6 +226,29 @@ flash. Its storage key must stay in sync with `THEME_STORAGE_KEY`.
 `ThemeToggle.tsx` renders the control — `variant="inline"` in the navbar, `variant="full"` in the
 mobile drawer.
 
+## Boot splash tokens
+
+The boot splash (`index.html`, see `docs/architecture.md`) is the **one place in the codebase that
+hardcodes brand colours**, and it is not a violation of [the one rule](#the-one-rule) — it is forced.
+The splash paints before `src/index.css` exists, because that stylesheet is render-blocking behind
+its Google Fonts `@import`, so no `--ui-*` token is resolvable yet.
+
+Its `<style>` block declares a parallel `--sp-*` set keyed off `html` / `html.dark`:
+
+| `--sp-*` | Copies | Light | Dark |
+|---|---|---|---|
+| `--sp-bg` | `--ui-bg-primary` | `#F4F7FA` | `#16191D` |
+| `--sp-accent` | `--ui-accent-primary` | `#2A75B3` | `#4F9DDB` |
+| `--sp-accent-hi` | `--ui-accent-primary-hover` | `#6FB0E4` | `#A8D2F2` |
+| `--sp-dim` | — (silhouette wash) | `rgba(22,25,29,.12)` | `rgba(242,244,247,.1)` |
+| `--sp-text` | — (meter label) | `rgba(22,25,29,.55)` | `rgba(242,244,247,.55)` |
+
+**If you change `--ui-bg-primary` or `--ui-accent-primary`, change these too.** `--sp-bg` matching
+`--ui-bg-primary` is load-bearing rather than cosmetic: the exit swaps the splash for the real page
+mid-sweep, and that swap is only invisible because the two backgrounds are the same colour.
+
+The splash uses `ui-monospace` for the same reason — waiting on Roboto would defeat the point.
+
 ## Scroll reveal animations
 
 Section blocks and cards fade and rise into view as you scroll to them: 16px, 500ms, once per page
