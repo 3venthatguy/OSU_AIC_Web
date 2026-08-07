@@ -67,7 +67,7 @@ export const OFFICERS: Officer[] = [
   {
     id: 'harker-lecroy',
     name: 'Harker LeCroy',
-    role: 'Communications Officer',
+    role: 'Chief Communications Officer',
     major: 'Electrical & Computer Engineering',
     minor: 'Robotics & Autonomous Systems',
     year: '2nd Year',
@@ -76,20 +76,20 @@ export const OFFICERS: Officer[] = [
     socials: {}
   },
   {
-    id: 'cynthia-lm',
-    name: 'Cynthia Lm',
-    role: 'Technology Officer',
+    id: 'cynthia-song',
+    name: 'Cynthia Song',
+    role: 'Technology Director',
     major: 'Data Analytics',
     minor: 'Cognitive Science',
     year: '3rd Year',
-    initials: 'CL',
+    initials: 'CS',
     bio: 'Co-leads the club\'s technical programming, workshop curriculum, and semester project teams.',
     socials: {}
   },
   {
     id: 'evan-menges',
     name: 'Evan Menges',
-    role: 'Technology Officer',
+    role: 'Technology Director',
     major: 'Electrical Engineering + Economics',
     minor: 'Nuclear Engineering',
     year: '4th Year',
