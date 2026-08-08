@@ -1,3 +1,8 @@
+// `import type` matters here: data/events.ts imports ClubEvent back from this
+// file, and a value import would make that a real runtime cycle. Type-only
+// imports are erased at compile time, so this direction is free.
+import type { EventCategory } from './data/events';
+
 export interface Officer {
   id: string;
   name: string;
@@ -6,7 +11,7 @@ export interface Officer {
   minor?: string;
   year: string;
   bio: string;
-  /** Resolved URL of a bundled headshot imported in data.ts. Omit to render `initials` instead. */
+  /** Resolved URL of a bundled headshot imported in data/officers.ts. Omit to render `initials` instead. */
   photo?: string;
   initials: string;
   socials: {
@@ -19,16 +24,26 @@ export interface Officer {
 
 export interface ClubEvent {
   id: string;
-  category: 'Workshop' | 'Speaker' | 'HackAI' | 'Social';
+  /** An id from EVENT_CATEGORIES in data/events.ts — the one category list. */
+  category: EventCategory;
   title: string;
   description: string;
-  dateString: string; // Full readable date e.g. "Sept 12, 2025"
-  day: string; // Day number e.g. "12"
-  month: string; // Month initials e.g. "SEPT"
-  time: string; // "6:00 PM"
-  location: string; // "Dreese Lab 260"
+  /**
+   * The one canonical date, ISO 'YYYY-MM-DD', local-civil (not a timestamp).
+   * Every display string — the 'OCT'/'07' badge, 'Oct 7, 2026', the weekday —
+   * derives from this at render time via src/utils/date.ts.
+   */
+  date: string;
+  time: string; // "7:00 PM"
+  location: string; // "Enarson 258"
   rsvpUrl: string;
   recapUrl?: string;
+  /**
+   * OVERRIDE ONLY. Omit it and past-ness is derived from `date` vs today, which
+   * self-heals as time passes. Set it explicitly only to pin an event on the
+   * wrong side of the line — e.g. holding a just-finished event out of the
+   * recap strip until its `recapUrl` exists. See isEventPast() in utils/events.
+   */
   isPast?: boolean;
 }
 

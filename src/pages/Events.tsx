@@ -1,53 +1,62 @@
-import React, { useState } from 'react';
-import { EVENTS } from '../data';
-import { ClubEvent } from '../types';
-import { Calendar, MapPin, Clock, ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { EVENTS, EVENT_CATEGORIES } from '../data/events';
+import { MapPin, Clock, ArrowRight, CheckCircle } from 'lucide-react';
 import { TextScramble } from '../components/TextScramble';
 import { Reveal } from '../components/Reveal';
+import { EventCalendar } from '../components/EventCalendar';
 import { useRevealProps, useRevealSequenceProps, sequenceDelay, staggerDelay } from '../hooks/useReveal';
+import { formatLongDate, isoDayNumber, isoMonthBadge, todayISO } from '../utils/date';
+import {
+  ALL_FILTER,
+  byDateAsc,
+  categoryAccentClass,
+  categoryLabel,
+  isEventPast,
+  matchesFilter,
+} from '../utils/events';
 import {
   MEETING_LOCATION,
   MEETING_DAY,
-  MEETING_TIME
+  MEETING_TIME,
+  CLUB_DISCORD_URL,
+  NEWSLETTER_URL
 } from '../data';
 
 export const Events: React.FC = () => {
   // Sequenced, not all-at-once: the hero's eyebrow, heading, copy and buttons
   // each get their own slot. See `useRevealSequenceProps`.
   const heroReveal = useRevealSequenceProps();
+  const calendarHeaderReveal = useRevealProps();
+  const calendarModuleReveal = useRevealProps();
   const upcomingHeaderReveal = useRevealProps();
   const pastHeaderReveal = useRevealProps();
-  const [activeFilter, setActiveFilter] = useState<string>('All');
+  const [activeFilter, setActiveFilter] = useState<string>(ALL_FILTER);
   const [rsvpStatus, setRsvpStatus] = useState<{ [key: string]: boolean }>({});
 
-  const filters = ['All', 'Workshop', 'Speaker', 'HackAI', 'Social'];
+  /**
+   * Resolved once per mount and threaded everywhere "past" is decided, so the
+   * whole page agrees on today even if a render straddles midnight — and so the
+   * calendar's memos aren't invalidated by a fresh string every render.
+   */
+  const today = useMemo(() => todayISO(), []);
 
-  // "HackAI" is a proper noun, so it can't just take a naive trailing "s".
-  const filterLabels: Record<string, string> = {
-    All: 'All Events',
-    Workshop: 'Workshops',
-    Speaker: 'Speakers',
-    HackAI: 'HackAI',
-    Social: 'Socials',
-  };
+  // The 'All' pill isn't a category, so it's prepended rather than stored in
+  // EVENT_CATEGORIES.
+  const filters = [ALL_FILTER, ...EVENT_CATEGORIES.map((c) => c.id)];
 
-  const upcomingEvents = EVENTS.filter((e) => !e.isPast);
-  const pastEvents = EVENTS.filter((e) => e.isPast);
+  const upcomingEvents = useMemo(
+    () => EVENTS.filter((e) => !isEventPast(e, today)).sort(byDateAsc),
+    [today],
+  );
 
-  // Client-side filtering
-  const filteredUpcoming = activeFilter === 'All'
-    ? upcomingEvents
-    : upcomingEvents.filter((e) => e.category.toLowerCase() === activeFilter.toLowerCase());
+  // Past events honour the category pills too, so the calendar and the recap
+  // strip never disagree about what's visible.
+  const pastEvents = useMemo(
+    () => EVENTS.filter((e) => isEventPast(e, today) && matchesFilter(e, activeFilter)).sort(byDateAsc),
+    [today, activeFilter],
+  );
 
-  const getCategoryColor = (cat: string) => {
-    switch (cat.toLowerCase()) {
-      case 'workshop': return 'bg-accent-primary';
-      case 'speaker': return 'bg-accent-secondary';
-      case 'hackai': return 'bg-gradient-to-r from-accent-primary to-accent-secondary';
-      case 'social': return 'bg-accent-tertiary';
-      default: return 'bg-text-muted';
-    }
-  };
+  const filteredUpcoming = upcomingEvents.filter((e) => matchesFilter(e, activeFilter));
 
   const handleRsvp = (eventId: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -101,7 +110,7 @@ export const Events: React.FC = () => {
                       : 'bg-bg-elevated text-text-secondary hover:text-accent-primary border-border-subtle shadow-sm hover:scale-[1.01]'
                   }`}
                 >
-                  {filterLabels[filter] ?? filter}
+                  {filter === ALL_FILTER ? 'All Events' : categoryLabel(filter)}
                 </button>
               );
             })}
@@ -109,7 +118,27 @@ export const Events: React.FC = () => {
         </div>
       </section>
 
-      {/* 2. UPCOMING EVENTS GRID */}
+      {/* 2. INTERACTIVE MONTH CALENDAR */}
+      <section id="events-calendar-section" className="py-20 bg-veil-band border-b border-border-subtle">
+        <div className="max-w-7xl mx-auto px-6 md:px-16">
+
+          <div className="flex items-center space-x-3 mb-10 select-none" {...calendarHeaderReveal}>
+            <span className="font-sans text-[12px] font-bold text-accent-secondary uppercase tracking-[0.2em]">
+              Browse By Date
+            </span>
+            <div className="flex-1 h-[1px] bg-border-subtle" />
+          </div>
+
+          {/* The whole module reveals as one unit rather than per-cell. Note the
+              reveal transform applies to this element only, so the day cells'
+              hover:scale still works — just don't add a hover transform here. */}
+          <div {...calendarModuleReveal}>
+            <EventCalendar events={EVENTS} activeFilter={activeFilter} today={today} />
+          </div>
+        </div>
+      </section>
+
+      {/* 3. UPCOMING EVENTS GRID */}
       <section id="upcoming-events-grid-section" className="py-20 max-w-7xl mx-auto px-6 md:px-16">
         
         <div className="flex items-center space-x-3 mb-10 select-none" {...upcomingHeaderReveal}>
@@ -123,8 +152,21 @@ export const Events: React.FC = () => {
           <div id="no-events-fallback" className="py-20 text-center bg-bg-secondary/40 rounded-3xl border border-dashed border-border-medium/60 max-w-lg mx-auto p-8 flex flex-col items-center">
             <span className="text-3xl mb-3">📅</span>
             <h3 className="font-sans font-bold text-text-primary text-[15px] uppercase tracking-wide">No Scheduled Events</h3>
+            {/* Two different situations: nothing is scheduled at all, or nothing
+                matches the active filter. Blaming the filter in the first case
+                sends people toggling pills that were never the problem. */}
             <p className="font-sans text-xs text-text-secondary leading-relaxed mt-2 text-center max-w-xs">
-              There are no upcoming {(filterLabels[activeFilter] ?? activeFilter).toLowerCase()} on the calendar. Try toggling back to general event categories.
+              {upcomingEvents.length === 0 ? (
+                <>
+                  Nothing is on the schedule just yet. Follow us on{' '}
+                  <a href={CLUB_DISCORD_URL} target="_blank" rel="noreferrer" className="text-accent-primary font-bold hover:underline">Discord</a>
+                  {' '}or join the{' '}
+                  <a href={NEWSLETTER_URL} target="_blank" rel="noreferrer" className="text-accent-primary font-bold hover:underline">newsletter</a>
+                  {' '}to hear about the next one first.
+                </>
+              ) : (
+                <>There are no upcoming {categoryLabel(activeFilter).toLowerCase()} on the calendar. Try toggling back to general event categories.</>
+              )}
             </p>
           </div>
         ) : (
@@ -139,16 +181,16 @@ export const Events: React.FC = () => {
                 >
                   <div>
                     {/* Elevated categorical color bar at top */}
-                    <div className={`h-1.5 w-full ${getCategoryColor(item.category)}`} />
+                    <div className={`h-1.5 w-full ${categoryAccentClass(item.category)}`} />
 
                     <div className="p-6 relative">
                       {/* Floating Date Badge */}
                       <div className="absolute top-6 right-6 w-12 h-14 bg-bg-elevated group-hover:bg-bg-secondary border border-border-subtle flex flex-col items-center justify-center rounded-xl p-1 shadow-sm transition-colors select-none">
                         <span className="font-sans text-[9px] font-extrabold text-text-muted leading-none uppercase tracking-wide">
-                          {item.month}
+                          {isoMonthBadge(item.date)}
                         </span>
                         <span className="font-mono text-[22px] font-black text-text-primary leading-none mt-1">
-                          {item.day}
+                          {isoDayNumber(item.date)}
                         </span>
                       </div>
 
@@ -212,10 +254,10 @@ export const Events: React.FC = () => {
         )}
       </section>
 
-      {/* 3. PAST EVENTS STRIP */}
+      {/* 4. PAST EVENTS STRIP */}
       <section id="past-events-stripe-section" className="py-20 bg-veil-band border-t border-border-subtle">
         <div className="max-w-7xl mx-auto px-6 md:px-16">
-          
+
           <div className="flex items-center space-x-3 mb-10 select-none" {...pastHeaderReveal}>
             <span className="font-sans text-[12px] font-bold text-text-muted uppercase tracking-[0.2em]">
               Past Events Highlights
@@ -223,7 +265,19 @@ export const Events: React.FC = () => {
             <div className="flex-1 h-[1px] bg-border-subtle" />
           </div>
 
-          {/* Horizontal drag stripe list */}
+          {pastEvents.length === 0 ? (
+            /* Without this the heading above sits over an empty scroll track. */
+            <div id="no-past-events-fallback" className="py-16 text-center bg-bg-secondary/40 rounded-3xl border border-dashed border-border-medium/60 max-w-lg mx-auto p-8 flex flex-col items-center">
+              <span className="text-3xl mb-3">🗂️</span>
+              <h3 className="font-sans font-bold text-text-primary text-[15px] uppercase tracking-wide">No Recaps Yet</h3>
+              <p className="font-sans text-xs text-text-secondary leading-relaxed mt-2 text-center max-w-xs">
+                {EVENTS.length === 0
+                  ? 'Once events have wrapped, their recaps and photo galleries land here.'
+                  : `No past ${categoryLabel(activeFilter).toLowerCase()} to show. Try another category.`}
+              </p>
+            </div>
+          ) : (
+          /* Horizontal drag stripe list */
           <div
             id="past-events-strip-track"
             className="flex space-x-6 overflow-x-auto pb-4 snap-x pr-4 scrollbar-thin"
@@ -241,7 +295,7 @@ export const Events: React.FC = () => {
                       {item.category}
                     </span>
                     <span className="font-mono text-xs text-text-muted font-semibold">
-                      {item.dateString}
+                      {formatLongDate(item.date)}
                     </span>
                   </div>
 
@@ -269,6 +323,7 @@ export const Events: React.FC = () => {
               </Reveal>
             ))}
           </div>
+          )}
 
         </div>
       </section>

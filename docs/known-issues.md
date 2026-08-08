@@ -12,7 +12,11 @@ Things that look like bugs but are known. Read before "fixing" them.
 - **Most officers have empty `socials: {}`.** The previous values pointed at accounts belonging to
   other people or to accounts that don't exist.
 - The **Vice President** entry is a real vacancy (`name: 'TBD'`), not a data error.
-- `EVENTS[].rsvpUrl` and `recapUrl` point at `https://example.com/...` for several entries.
+- **`EVENTS` is intentionally empty.** The eight previous entries were placeholder events with
+  invented descriptions and `example.com` links, so they were removed rather than shipped as if real.
+  The Events page renders designed empty states — the calendar still paginates, and the empty rail
+  and both section fallbacks point at Discord and the newsletter. Add real events per
+  [content-and-data.md](content-and-data.md#add-an-event); nothing else needs touching.
 - Homepage stat counters, HackAI prize amounts, and the Projects hero stat strip are **illustrative
   numbers**, not audited figures.
 

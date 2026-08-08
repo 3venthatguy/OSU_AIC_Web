@@ -4,7 +4,7 @@ An elegant, high-performance, and feature-rich official web application for the 
 
 > 📚 **Developer & AI-agent documentation lives in [`docs/`](docs/README.md).**
 > Editing site content? Go straight to [`docs/content-and-data.md`](docs/content-and-data.md) — nearly
-> every string, date, link, and roster on the site is a named export of [`src/data.ts`](src/data.ts).
+> every string, date, link, and roster on the site is a named export somewhere under [`src/data/`](src/data/).
 
 ---
 
@@ -84,7 +84,13 @@ This will compile assets and output static files into the `dist/` directory, rea
 │   │   ├── Events.tsx               # Academic calendar & RSVPs
 │   │   ├── HackAI.tsx               # Premier annual hackathon portal
 │   │   └── Projects.tsx             # Incubator pipelines browser and filter
-│   ├── data.ts              # Static data references for rosters, events, and projects
+│   ├── data/                # Static data references for rosters, events, and projects
+│   │   ├── general.ts             # Contact links, meeting info, HackAI event details
+│   │   ├── officers.ts            # OFFICERS
+│   │   ├── events.ts              # EVENTS
+│   │   ├── projects.ts            # PROJECTS
+│   │   ├── faqs.ts                # FAQS, HACKAI_FAQS
+│   │   └── index.ts               # Barrel re-export — `from '../data'` still works
 │   ├── types.ts             # Global shared interface and model properties
 │   └── main.tsx / App.tsx   # Client bootstrap entry points and state router
 ├── package.json             # Build commands, active dev packages, and engine limits

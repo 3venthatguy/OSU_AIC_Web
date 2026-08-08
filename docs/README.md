@@ -5,7 +5,7 @@ Developer and AI-agent reference for the **Artificial Intelligence Club at Ohio 
 ## What this app is
 
 A single-page marketing/informational site for the club. No backend, no database, no CMS, no
-authentication. Everything the site displays is **hardcoded in `src/data.ts`** and compiled into a
+authentication. Everything the site displays is **hardcoded under `src/data/`** and compiled into a
 static bundle at build time. Deploying = building and serving `dist/`.
 
 ## Read these in order
@@ -53,7 +53,7 @@ docs/                   # You are here
 src/
 ├── main.tsx            # Entry point; builds the favicon on a canvas at runtime
 ├── App.tsx             # Page state + layout shell
-├── data.ts             # ★ ALL site content lives here
+├── data/               # ★ ALL site content lives here — general/officers/events/projects/faqs
 ├── types.ts            # Officer / ClubEvent / ProjectItem interfaces
 ├── index.css           # ★ ALL color tokens live here (light + dark)
 ├── theme.ts            # Light/dark store; persists preference, follows the OS

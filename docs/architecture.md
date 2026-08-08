@@ -89,12 +89,14 @@ fully-connected network of 36 glass spheres in three.js, on the Home page only.
 | `components/SmoothScrollProvider.tsx` | App | See above |
 | `components/PageTransition.tsx` | App | See above |
 | `components/NeuralNetworkCanvas.tsx` | Home | three.js + GSAP hero |
-| `components/StatsBar.tsx` | Home | Count-up numbers; **targets are hardcoded in the file**, not `data.ts` |
+| `components/StatsBar.tsx` | Home | Count-up numbers; **targets are hardcoded in the file**, not `data/` |
 | `components/MissionStatement.tsx` | Home | Mission copy hardcoded in the file |
 | `components/SponsorsBar.tsx` | Home | Sponsor logo marquee; logos imported from `assets/sponsors/` |
-| `components/HackAITeaser.tsx` | Home | Pulls `HACKAI_*` constants from `data.ts` |
+| `components/HackAITeaser.tsx` | Home | Pulls `HACKAI_*` constants from `data/general.ts` |
 | `components/AboutSection.tsx` | About | "Who We Are" block; copy hardcoded in the file |
-| `components/FAQ.tsx` | About | Renders `FAQS` from `data.ts` |
+| `components/FAQ.tsx` | About | Renders `FAQS` from `data/faqs.ts` |
+| `components/EventCalendar.tsx` | Events | Interactive month grid; owns view/selection/focus state, roving-tabindex keyboard nav, month clamp and jump pills |
+| `components/EventCalendarRail.tsx` | Events | Detail panel beside the calendar; presentational, three states (no events at all / nothing on this day / event list) |
 | `components/TextScramble.tsx` | All page titles | Glitch-in text effect, once on mount |
 | `components/ThemeToggle.tsx` | Navbar (desktop + mobile drawer) | Light/dark switch; see below |
 | `components/Reveal.tsx` | Card grids everywhere | Scroll-reveal wrapper; see [styling.md](styling.md) |
